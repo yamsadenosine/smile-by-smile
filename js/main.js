@@ -89,15 +89,21 @@ if (window.gsap) {
     });
   });
 
-  // Total raised bar — purely visual, no goal attached.
-  // TODO: bump this width whenever you update data-count-to above, so the bar
-  // keeps reflecting "funds raised" rather than being stuck at one value.
-  document.querySelectorAll('[data-raised-fill]').forEach((el) => {
-    gsap.to(el, {
-      width: '0%', duration: 1.8, ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 92%', once: true }
+  // Total raised bar — computed automatically from the raised total above.
+  // No goal involved: it fills as progress toward funding the *next* $500
+  // patient (and reads as full right when a patient just got funded).
+  const raisedNumEl = document.querySelector('[data-count-to]');
+  const raisedFillEl = document.querySelector('[data-raised-fill]');
+  if (raisedNumEl && raisedFillEl) {
+    const PATIENT_COST = 500;
+    const raised = parseFloat(raisedNumEl.dataset.countTo) || 0;
+    const remainder = raised % PATIENT_COST;
+    const fillPct = raised > 0 && remainder === 0 ? 100 : (remainder / PATIENT_COST) * 100;
+    gsap.to(raisedFillEl, {
+      width: fillPct + '%', duration: 1.8, ease: 'power3.out',
+      scrollTrigger: { trigger: raisedFillEl, start: 'top 92%', once: true }
     });
-  });
+  }
 }
 
 /* =========================================================
