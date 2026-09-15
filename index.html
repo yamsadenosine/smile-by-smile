@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smile by Smile — Restoring Confidence</title>
+<meta name="description" content="Smile by Smile provides free dental reconstructions to underprivileged people overseas who have never seen a dentist, fully sponsored, one smile at a time.">
+
+<!-- Fonts: DM Sans (premium, single-family sans — ui-ux-pro-max typography pick) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+
+<!-- Tailwind (utility layout) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['DM Sans', 'sans-serif'] },
+        colors: {
+          platinum: { DEFAULT: '#AEB4C0', light: '#EDEFF3' },
+          gold: { DEFAULT: '#C9A356', light: '#EAD9AE', dark: '#8A6A34' },
+          ink: '#F4F0E8',
+        },
+        boxShadow: {
+          glow: '0 8px 32px rgba(201, 163, 86, 0.25)',
+        }
+      }
+    }
+  }
+</script>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-sans text-ink antialiased">
+
+<!-- ===================== BACKGROUND ===================== -->
+<div class="bg-scene" aria-hidden="true">
+  <div class="orb orb-bronze"></div>
+  <div class="orb orb-platinum"></div>
+  <div class="orb orb-gold"></div>
+  <div class="grain"></div>
+</div>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav-wrap">
+  <nav class="glass nav">
+    <a href="#hero" class="nav-logo">
+      <span class="nav-logo-mark">☺</span>
+      <span>Smile <em>by</em> Smile</span>
+    </a>
+    <div class="nav-links">
+      <a href="#gallery">Transformations</a>
+      <a href="#in-progress">In Progress</a>
+      <a href="#donate-bar">Raised</a>
+      <a href="#give">Give</a>
+      <a href="#refer">Refer Someone</a>
+      <a href="#shop">Shop</a>
+      <a href="#about">About</a>
+    </div>
+    <a href="#give" class="btn btn-gold btn-sm">Donate</a>
+    <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="glass nav-mobile" id="navMobile">
+    <a href="#gallery">Transformations</a>
+    <a href="#in-progress">In Progress</a>
+    <a href="#donate-bar">Raised</a>
+    <a href="#give">Give</a>
+    <a href="#refer">Refer Someone</a>
+    <a href="#shop">Shop</a>
+    <a href="#about">About</a>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== 1. HERO ===================== -->
+<section id="hero" class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow reveal">Restoring Confidence, One Smile at a Time</p>
+    <h1 class="hero-title reveal">
+      Smile <span class="text-gradient">by</span> Smile
+    </h1>
+    <p class="hero-sub reveal">
+      Free dental reconstructions for underprivileged people overseas who have
+      never sat in a dentist's chair — fully sponsored, patient by patient,
+      because every smile deserves a second chance.
+    </p>
+    <div class="hero-cta reveal">
+      <a href="#give" class="btn btn-gold btn-lg">Fund a Smile</a>
+      <a href="#gallery" class="btn btn-ghost btn-lg">See the Transformations ↓</a>
+    </div>
+
+    <div class="glass hero-stat-row reveal">
+      <div class="hero-stat">
+        <span class="hero-stat-num" data-count="100">0</span><span>%</span>
+        <p>Donor-funded, zero salary</p>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" data-count="0">0</span>
+        <p>Patients treated<br><span class="fine">(update as you grow)</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-glass-shard shard-1"></div>
+  <div class="hero-glass-shard shard-2"></div>
+  <a href="#gallery" class="scroll-cue" aria-hidden="true"><span></span></a>
+</section>
+
+<!-- ===================== 2. BEFORE / AFTER GALLERY ===================== -->
+<section id="gallery" class="section">
+  <div class="section-head reveal">
+    <p class="eyebrow">The Most Important Part of This Page</p>
+    <h2>Real Mouths. Real Transformations.</h2>
+    <p class="section-sub">
+      Tap any photo to reveal the after — and read exactly what treatment
+      took this patient from years of pain to a smile they're proud of.
+    </p>
+  </div>
+
+  <div class="ba-grid">
+
+    <!-- Card 1 : REAL patient photos -->
+    <article class="glass ba-card reveal">
+      <button class="ba-tap" data-ba-tap type="button" style="--ba-ratio:4/3" aria-label="Tap to compare before and after">
+        <img src="assets/img/before-1.jpg" alt="Before dental treatment" class="ba-photo is-visible" data-ba-before draggable="false">
+        <img src="assets/img/after-1.jpg" alt="After dental treatment" class="ba-photo" data-ba-after draggable="false">
+        <span class="ba-tag ba-tag-state" data-ba-state-tag>Before</span>
+        <span class="ba-tap-hint" data-ba-hint>Tap to see after ↻</span>
+      </button>
+      <div class="ba-caption">
+        <h3>Real Patient — Restorative Care</h3>
+        <p data-ba-desc
+           data-before-text="Pt suffered with severe generalized dental caries with multiple missing/fractured teeth and advanced loss of tooth structure."
+           data-after-text="Pt's caries were removed, the remaining teeth were prepared, and a fixed bridge was fabricated to restore the upper arch.">Pt suffered with severe generalized dental caries with multiple missing/fractured teeth and advanced loss of tooth structure.</p>
+      </div>
+    </article>
+
+    <!-- Card 2 : REAL patient photos -->
+    <article class="glass ba-card reveal">
+      <button class="ba-tap" data-ba-tap type="button" style="--ba-ratio:4/3" aria-label="Tap to compare before and after">
+        <img src="assets/img/before-2.jpg" alt="Before dental treatment" class="ba-photo is-visible" data-ba-before draggable="false">
+        <img src="assets/img/after-2.jpg" alt="After dental treatment" class="ba-photo" data-ba-after draggable="false">
+        <span class="ba-tag ba-tag-state" data-ba-state-tag>Before</span>
+        <span class="ba-tap-hint" data-ba-hint>Tap to see after ↻</span>
+      </button>
+      <div class="ba-caption">
+        <h3>Real Patient — Full Reconstruction</h3>
+        <p data-ba-desc
+           data-before-text="Severe maxillary tooth destruction with multiple missing teeth, extensive caries/fractured tooth structure, and compromised esthetics/function."
+           data-after-text="Caries and non-restorable tooth structure were removed, and the maxillary arch was restored with a multi-unit fixed bridge/crown prosthesis to replace the missing teeth and restore the smile.">Severe maxillary tooth destruction with multiple missing teeth, extensive caries/fractured tooth structure, and compromised esthetics/function.</p>
+      </div>
+    </article>
+
+    <!-- Card 3 : REAL patient photos -->
+    <article class="glass ba-card reveal">
+      <button class="ba-tap" data-ba-tap type="button" style="--ba-ratio:3/4" aria-label="Tap to compare before and after">
+        <img src="assets/img/before-3.jpg" alt="Before dental treatment" class="ba-photo is-visible" data-ba-before draggable="false">
+        <img src="assets/img/after-3.jpg" alt="After dental treatment" class="ba-photo" data-ba-after draggable="false">
+        <span class="ba-tag ba-tag-state" data-ba-state-tag>Before</span>
+        <span class="ba-tap-hint" data-ba-hint>Tap to see after ↻</span>
+      </button>
+      <div class="ba-caption">
+        <h3>Real Patient — Restored Smile</h3>
+        <p data-ba-desc
+           data-before-text="Severe generalized dental breakdown with extensive caries, multiple missing and non-restorable teeth, and significant loss of function and esthetics."
+           data-after-text="The hopeless teeth were extracted, the mouth was cleaned and prepared, and a removable denture was fabricated to replace the missing teeth and restore the patient's smile, chewing ability, and overall function.">Severe generalized dental breakdown with extensive caries, multiple missing and non-restorable teeth, and significant loss of function and esthetics.</p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ===================== IN PROGRESS ===================== -->
+<section id="in-progress" class="section">
+  <div class="section-head reveal">
+    <p class="eyebrow">Follow Along</p>
+    <h2>In Progress</h2>
+    <p class="section-sub">
+      Real cases currently underway — we'll keep updating this section as
+      donors help fund each step of treatment.
+    </p>
+  </div>
+
+  <div class="progress-case-grid">
+    <article class="glass progress-case reveal">
+      <div class="progress-case-media">
+        <img src="assets/img/inprogress-1.jpg" alt="In-progress dental case, before treatment" draggable="false">
+        <span class="ba-tag progress-case-tag">In Treatment</span>
+      </div>
+      <div class="progress-case-body">
+        <h3>Case 001</h3>
+        <p>This patient's care is actively underway — decayed and fractured teeth are being addressed before restoration begins.</p>
+      </div>
+    </article>
+
+    <div class="glass donation-cta reveal">
+      <div class="donation-cta-mark">✦</div>
+      <h3>Your Donation Can Change a Life</h3>
+      <p>Every gift, no matter the size, goes straight to funding a real step of treatment for a real patient like this one.</p>
+      <a href="#give" class="btn btn-gold btn-block">Give Today</a>
+    </div>
+
+    <div class="glass donation-cta reveal">
+      <div class="donation-cta-mark">🦷</div>
+      <h3>Every Case Starts With a Yes</h3>
+      <p>Donors are what move a patient from "in progress" to a finished smile. Your gift could fund the very next step.</p>
+      <a href="#gallery" class="btn btn-outline btn-block">See Finished Cases</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. FUNDS RAISED ===================== -->
+<section id="donate-bar" class="section">
+  <div class="glass raised-panel reveal">
+    <p class="eyebrow">Together, So Far</p>
+    <h2>Total Raised</h2>
+    <span class="raised-num" data-count-to="12400">$0</span>
+
+    <div class="raised-track">
+      <div class="raised-fill" data-raised-fill>
+        <span class="raised-shine"></span>
+      </div>
+    </div>
+
+    <p class="raised-sub">🦷 That's roughly <strong>~6 patients</strong> fully funded — thank you.</p>
+  </div>
+</section>
+
+<!-- ===================== 4. DONATION OPTIONS ===================== -->
+<section id="give" class="section">
+  <div class="section-head reveal">
+    <p class="eyebrow">Give</p>
+    <h2>Sponsor a Smile</h2>
+    <p class="section-sub">Every contribution — however small or often — goes directly to a patient's reconstruction. Pick what fits your rhythm.</p>
+  </div>
+
+  <!-- ===== Impact Calculator: live "how far does this go" visualizer ===== -->
+  <div class="glass impact-panel reveal">
+    <div class="impact-grid">
+
+      <div class="impact-controls">
+        <p class="eyebrow impact-eyebrow">See Your Impact</p>
+        <h3>Move the Slider. Watch the Smile Come Together.</h3>
+        <p>A full smile reconstruction costs about <strong style="color:var(--gold-light)">$500</strong>. Anything else still helps — a couple of teeth, an extraction, a root canal. Drag to see exactly what your gift funds.</p>
+
+        <div class="impact-amount">
+          <span class="impact-amount-num">$<span data-impact-amount-num>150</span></span>
+          <span class="impact-amount-freq">one-time gift</span>
+        </div>
+
+        <input type="range" class="impact-slider" min="0" max="1500" step="5" value="150" data-impact-slider aria-label="Donation amount">
+
+        <div class="impact-presets">
+          <button class="chip" data-impact-preset="25">$25</button>
+          <button class="chip" data-impact-preset="100">$100</button>
+          <button class="chip is-active" data-impact-preset="150">$150</button>
+          <button class="chip" data-impact-preset="500">$500</button>
+          <button class="chip" data-impact-preset="1000">$1,000</button>
+        </div>
+
+        <div class="impact-result" data-impact-result>
+          <span>Restores <strong data-impact-teeth>3</strong> of 10 teeth for one patient — <strong data-impact-remaining>7</strong> more to a full smile.</span>
+        </div>
+
+        <button class="btn btn-gold" data-impact-donate>Donate $<span data-impact-donate-amount>150</span> Now</button>
+      </div>
+
+      <div class="impact-visual">
+        <svg viewBox="0 0 480 220" role="img" aria-label="Illustration of ten broken, decayed teeth that turn into a clean white restored smile as the donation amount increases">
+          <defs>
+            <linearGradient id="rotGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8a7a4e"></stop>
+              <stop offset="40%" stop-color="#6b5636"></stop>
+              <stop offset="75%" stop-color="#4a3a22"></stop>
+              <stop offset="100%" stop-color="#3a2c1a"></stop>
+            </linearGradient>
+          </defs>
+          <ellipse cx="250" cy="205" rx="190" ry="9" fill="#000" opacity="0.35"></ellipse>
+
+          <g data-tooth-index="0" transform="translate(55,80) rotate(-14)">
+            <path class="tooth-damaged" d="M-15,60 L-15,9 L-7,2 L-2,10 L4,1 L11,7 L15,3 L15,60 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="-3" cy="24" r="4.5" fill="#241b10"></circle>
+              <circle cx="5" cy="42" r="2.8" fill="#5a4a26"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-15" y="0" width="30" height="60" rx="11"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,26)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="1" transform="translate(100,100) rotate(-11)">
+            <path class="tooth-damaged" d="M-16,70 L-16,10 L-8,2 L-2,11 L4,1 L10,8 L16,4 L16,70 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="6" cy="30" r="4" fill="#5a4a26"></circle>
+              <path d="M-4,14 L2,30 L-3,48" stroke="#241b10" stroke-width="1.3" fill="none" stroke-linecap="round"></path>
+            </g>
+            <rect class="tooth-fixed" x="-16" y="0" width="32" height="70" rx="12"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,32)" fill="#EAD9AE"></path>
+          </g>
+
+          <!-- broken/chipped tooth -->
+          <g data-tooth-index="2" transform="translate(145,114) rotate(-8)">
+            <path class="tooth-damaged" d="M-17,77 L-17,8 L-9,1 L-2,19 L5,2 L17,9 L17,77 Z"></path>
+            <g class="tooth-damage-marks">
+              <path d="M-6,10 L-2,19 L2,9 Z" fill="#1a1108"></path>
+              <circle cx="-8" cy="45" r="4" fill="#5a4a26"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-17" y="0" width="34" height="77" rx="13"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,36)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="3" transform="translate(190,124) rotate(-5)">
+            <path class="tooth-damaged" d="M-18.5,82 L-18.5,11 L-9,2 L-2,12 L5,1 L12,9 L18.5,4 L18.5,82 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="-9" cy="50" r="5" fill="#5a4a26"></circle>
+              <circle cx="8" cy="28" r="3" fill="#6b7a3a"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-18.5" y="0" width="37" height="82" rx="14"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,38)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="4" transform="translate(235,129) rotate(-2)">
+            <path class="tooth-damaged" d="M-19.5,85 L-19.5,10 L-9,2 L-2,11 L5,1 L13,8 L19.5,3 L19.5,85 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="3" cy="55" r="5.5" fill="#241b10"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-19.5" y="0" width="39" height="85" rx="15"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,40)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="5" transform="translate(279,129) rotate(2)">
+            <path class="tooth-damaged" d="M-19.5,85 L-19.5,4 L-12,9 L-5,1 L2,12 L9,2 L19.5,10 L19.5,85 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="-6" cy="38" r="4.5" fill="#5a4a26"></circle>
+              <path d="M5,15 L-2,42 L4,68" stroke="#241b10" stroke-width="1.3" fill="none" stroke-linecap="round"></path>
+            </g>
+            <rect class="tooth-fixed" x="-19.5" y="0" width="39" height="85" rx="15"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,40)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="6" transform="translate(323,124) rotate(5)">
+            <path class="tooth-damaged" d="M-18.5,82 L-18.5,5 L-11,9 L-4,1 L3,12 L10,2 L18.5,11 L18.5,82 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="10" cy="48" r="4" fill="#6b7a3a"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-18.5" y="0" width="37" height="82" rx="14"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,38)" fill="#EAD9AE"></path>
+          </g>
+
+          <!-- broken/chipped tooth -->
+          <g data-tooth-index="7" transform="translate(368,114) rotate(8)">
+            <path class="tooth-damaged" d="M-17,77 L-17,9 L-5,2 L2,19 L9,1 L17,8 L17,77 Z"></path>
+            <g class="tooth-damage-marks">
+              <path d="M6,9 L2,19 L-2,10 Z" fill="#1a1108"></path>
+              <circle cx="8" cy="48" r="4" fill="#5a4a26"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-17" y="0" width="34" height="77" rx="13"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,36)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="8" transform="translate(413,100) rotate(11)">
+            <path class="tooth-damaged" d="M-16,70 L-16,4 L-10,8 L-4,1 L2,11 L8,2 L16,10 L16,70 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="-7" cy="28" r="4" fill="#5a4a26"></circle>
+              <circle cx="5" cy="52" r="3" fill="#241b10"></circle>
+            </g>
+            <rect class="tooth-fixed" x="-16" y="0" width="32" height="70" rx="12"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,32)" fill="#EAD9AE"></path>
+          </g>
+
+          <g data-tooth-index="9" transform="translate(458,80) rotate(14)">
+            <path class="tooth-damaged" d="M-15,60 L-15,3 L-11,7 L-4,1 L2,10 L7,2 L15,9 L15,60 Z"></path>
+            <g class="tooth-damage-marks">
+              <circle cx="4" cy="26" r="3.8" fill="#5a4a26"></circle>
+              <path d="M-3,10 L3,28" stroke="#241b10" stroke-width="1.2" fill="none" stroke-linecap="round"></path>
+            </g>
+            <rect class="tooth-fixed" x="-15" y="0" width="30" height="60" rx="11"></rect>
+            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,26)" fill="#EAD9AE"></path>
+          </g>
+        </svg>
+        <p class="impact-visual-caption" data-impact-caption>One patient's smile — restored tooth by tooth as your gift grows.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="give-grid">
+
+    <div class="glass give-card reveal" data-give="one-time">
+      <div class="give-icon">✦</div>
+      <h3>One-Time</h3>
+      <p>A single gift, whenever you're able.</p>
+      <div class="give-amounts">
+        <button class="chip" data-amount="25">$25</button>
+        <button class="chip" data-amount="75">$75</button>
+        <button class="chip" data-amount="150">$150</button>
+        <button class="chip chip-custom" data-amount="custom">Other</button>
+      </div>
+      <button class="btn btn-outline btn-block" data-donate-btn data-freq="One-Time">Give Once</button>
+    </div>
+
+    <div class="glass give-card reveal give-card-featured" data-give="weekly">
+      <span class="give-badge">Most Impact</span>
+      <div class="give-icon">📅</div>
+      <h3>Weekly</h3>
+      <p>A steady weekly gift that adds up fast.</p>
+      <div class="give-amounts">
+        <button class="chip" data-amount="10">$10</button>
+        <button class="chip" data-amount="25">$25</button>
+        <button class="chip" data-amount="50">$50</button>
+        <button class="chip chip-custom" data-amount="custom">Other</button>
+      </div>
+      <button class="btn btn-gold btn-block" data-donate-btn data-freq="Weekly">Give Weekly</button>
+    </div>
+
+    <div class="glass give-card reveal" data-give="monthly">
+      <div class="give-icon">♾</div>
+      <h3>Monthly</h3>
+      <p>Become a recurring partner in restoring smiles.</p>
+      <div class="give-amounts">
+        <button class="chip" data-amount="20">$20</button>
+        <button class="chip" data-amount="50">$50</button>
+        <button class="chip" data-amount="100">$100</button>
+        <button class="chip chip-custom" data-amount="custom">Other</button>
+      </div>
+      <button class="btn btn-outline btn-block" data-donate-btn data-freq="Monthly">Give Monthly</button>
+    </div>
+
+  </div>
+  <p class="give-note reveal">🔒 Payments aren't connected yet — buttons are wired up and ready for Stripe or PayPal. See <code>js/main.js</code> → <code>handleDonate()</code>.</p>
+</section>
+
+<!-- ===================== REFERRAL ===================== -->
+<section id="refer" class="section">
+  <div class="section-head reveal">
+    <p class="eyebrow">Know Someone in Need?</p>
+    <h2>Refer a Friend or Family Member</h2>
+    <p class="section-sub">
+      Tell us about someone who's never had access to dental care — a relative, a friend,
+      anyone who needs it. We personally review every submission.
+    </p>
+  </div>
+
+  <form class="glass refer-form reveal" data-refer-form>
+    <div class="refer-grid">
+      <label class="refer-field">
+        <span>Your Name</span>
+        <input type="text" name="referrerName" required placeholder="Jane Doe">
+      </label>
+      <label class="refer-field">
+        <span>Your Email or Phone</span>
+        <input type="text" name="referrerContact" required placeholder="jane@email.com or (555) 123-4567">
+      </label>
+      <label class="refer-field">
+        <span>Their Name</span>
+        <input type="text" name="personName" required placeholder="Who needs help?">
+      </label>
+      <label class="refer-field">
+        <span>Your Relationship to Them</span>
+        <select name="relationship" required>
+          <option value="" disabled selected>Select one</option>
+          <option value="Family Member">Family Member</option>
+          <option value="Relative">Relative</option>
+          <option value="Friend">Friend</option>
+          <option value="Neighbor">Neighbor</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <label class="refer-field refer-field-wide">
+        <span>Their Contact Info (if known)</span>
+        <input type="text" name="personContact" placeholder="Phone, email, or location">
+      </label>
+      <label class="refer-field refer-field-wide">
+        <span>Briefly describe their situation</span>
+        <textarea name="situation" rows="4" required placeholder="What dental issues are they facing? How long has it been going on? Anything else we should know."></textarea>
+      </label>
+    </div>
+    <button type="submit" class="btn btn-gold btn-block">Send Referral</button>
+    <p class="give-note">✉ This opens your email app with the details pre-filled, sent directly for review. See <code>js/main.js</code> → <code>handleReferralSubmit()</code>.</p>
+  </form>
+</section>
+
+<!-- ===================== 5. MERCHANDISE ===================== -->
+<section id="shop" class="section">
+  <div class="section-head reveal">
+    <p class="eyebrow">A Thank You, Not a Transaction</p>
+    <h2>Wear the Mission</h2>
+    <p class="section-sub">Smile by Smile is a nonprofit — nothing here is for sale. These are our way of saying thank you to donors who give at the levels below. "I'd rather see you smile than cry."</p>
+  </div>
+
+  <div class="shop-grid">
+
+    <!-- Classic Tee: front/back scroll carousel + color swatches -->
+    <article class="glass shop-card reveal" data-shop-product>
+      <div class="shop-media">
+        <div class="shop-scroll" data-shop-scroll>
+          <div class="shop-slide"><img data-shop-front src="assets/img/merch-tee-black-front.png" alt="Smile by Smile Classic Tee, front" loading="lazy"></div>
+          <div class="shop-slide"><img data-shop-back src="assets/img/merch-tee-black-back.png" alt="Smile by Smile Classic Tee, back" loading="lazy"></div>
+        </div>
+        <span class="shop-face-label" data-shop-label>Front</span>
+        <button class="shop-nav shop-nav-prev" data-shop-prev aria-label="Previous photo">‹</button>
+        <button class="shop-nav shop-nav-next" data-shop-next aria-label="Next photo">›</button>
+        <div class="shop-dots" data-shop-dots>
+          <button class="shop-dot is-active" data-shop-dot="0" aria-label="Show front"></button>
+          <button class="shop-dot" data-shop-dot="1" aria-label="Show back"></button>
+        </div>
+      </div>
+      <div class="shop-body">
+        <div class="shop-body-head">
+          <h3>Classic Tee</h3>
+          <p class="shop-price">$75+ gift</p>
+        </div>
+        <p class="shop-desc">Oversized fit, heavyweight cotton. Yours as a thank-you for a $75+ donation. Scroll or tap the arrows to flip the shirt.</p>
+        <div class="shop-swatches" data-swatch-group>
+          <button class="swatch is-active" style="--swatch-color:#1c1c1c" data-swatch-name="Black"
+                  data-front="assets/img/merch-tee-black-front.png" data-back="assets/img/merch-tee-black-back.png" aria-label="Black"></button>
+          <button class="swatch" style="--swatch-color:#a9c6e8" data-swatch-name="Sky Blue"
+                  data-front="assets/img/merch-tee-blue-front.png" data-back="assets/img/merch-tee-blue-back.png" aria-label="Sky Blue"></button>
+          <button class="swatch" style="--swatch-color:#e9e2d0" data-swatch-name="Cream"
+                  data-front="assets/img/merch-tee-cream-front.png" data-back="assets/img/merch-tee-cream-back.png" aria-label="Cream"></button>
+          <button class="swatch" style="--swatch-color:#4b5320" data-swatch-name="Olive Green"
+                  data-front="assets/img/merch-tee-green-front.png" data-back="assets/img/merch-tee-green-back.png" aria-label="Olive Green"></button>
+          <button class="swatch" style="--swatch-color:#5c1f3d" data-swatch-name="Berry Purple"
+                  data-front="assets/img/merch-tee-purple-front.png" data-back="assets/img/merch-tee-purple-back.png" aria-label="Berry Purple"></button>
+          <span class="swatch-name" data-swatch-name-label>Black</span>
+        </div>
+        <button class="btn btn-outline btn-block" data-gift-btn data-product="Classic Tee" data-threshold="75">Donate $75+ to Receive This</button>
+      </div>
+    </article>
+
+    <!-- Crewneck: front/back scroll carousel + color swatches -->
+    <article class="glass shop-card reveal" data-shop-product>
+      <div class="shop-media">
+        <div class="shop-scroll" data-shop-scroll>
+          <div class="shop-slide"><img data-shop-front src="assets/img/merch-sweatshirt-blue-front.png" alt="Smile by Smile Crewneck, front" loading="lazy"></div>
+          <div class="shop-slide"><img data-shop-back src="assets/img/merch-sweatshirt-blue-back.png" alt="Smile by Smile Crewneck, back" loading="lazy"></div>
+        </div>
+        <span class="shop-face-label" data-shop-label>Front</span>
+        <button class="shop-nav shop-nav-prev" data-shop-prev aria-label="Previous photo">‹</button>
+        <button class="shop-nav shop-nav-next" data-shop-next aria-label="Next photo">›</button>
+        <div class="shop-dots" data-shop-dots>
+          <button class="shop-dot is-active" data-shop-dot="0" aria-label="Show front"></button>
+          <button class="shop-dot" data-shop-dot="1" aria-label="Show back"></button>
+        </div>
+      </div>
+      <div class="shop-body">
+        <div class="shop-body-head">
+          <h3>Crewneck</h3>
+          <p class="shop-price">$125+ gift</p>
+        </div>
+        <p class="shop-desc">Heavyweight fleece crewneck. Yours as a thank-you for a $125+ donation. Scroll or tap the arrows to flip the sweatshirt.</p>
+        <div class="shop-swatches" data-swatch-group>
+          <button class="swatch is-active" style="--swatch-color:#a9c6e8" data-swatch-name="Sky Blue"
+                  data-front="assets/img/merch-sweatshirt-blue-front.png" data-back="assets/img/merch-sweatshirt-blue-back.png" aria-label="Sky Blue"></button>
+          <button class="swatch" style="--swatch-color:#1c1c1c" data-swatch-name="Black"
+                  data-front="assets/img/merch-sweatshirt-black-front.png" data-back="assets/img/merch-sweatshirt-black-back.png" aria-label="Black"></button>
+          <span class="swatch-name" data-swatch-name-label>Sky Blue</span>
+        </div>
+        <button class="btn btn-outline btn-block" data-gift-btn data-product="Crewneck" data-threshold="125">Donate $125+ to Receive This</button>
+      </div>
+    </article>
+
+  </div>
+  <p class="give-note reveal">🎁 Gifts aren't automated yet — this button is wired up and ready to connect to your donation/fulfillment flow. See <code>js/main.js</code> → <code>handleGiftClaim()</code>.</p>
+</section>
+
+<!-- ===================== 6. ABOUT ME ===================== -->
+<section id="about" class="section about">
+  <div class="glass about-panel reveal">
+    <div class="about-photo-wrap">
+      <div class="about-photo">
+        <img src="assets/img/founder-avatar.jpg" alt="Yammin Aldeib, founder of Smile by Smile">
+      </div>
+      <div class="about-photo-ring"></div>
+    </div>
+    <div class="about-copy">
+      <p class="eyebrow">About Me</p>
+      <h2>Hi, I'm Yammin Aldeib — Founder of Smile by Smile</h2>
+      <p>
+        I founded Smile by Smile in the spring of 2025. After meeting individuals who
+        didn't know what a dentist was, I was pushed to change that. I believe that
+        nobody should go their whole life having never seen a dentist, living with pain
+        and hiding their smile, just because of where they were born.
+      </p>
+      <blockquote class="about-quote">
+        "The best way to find yourself is to lose yourself in the service of others."
+        <cite>— Gandhi</cite>
+      </blockquote>
+      <p>
+        Being the reason someone is able to eat the foods they love, smile at the people
+        they love, and get another shot at happiness — that's the highest honor I could
+        ask for.
+      </p>
+      <a href="#give" class="btn btn-gold">Support the Mission</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="glass footer-inner">
+    <div class="footer-brand">
+      <span class="nav-logo-mark">☺</span> Smile <em>by</em> Smile
+      <p>Restoring confidence, one smile at a time.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#gallery">Transformations</a>
+      <a href="#give">Give</a>
+      <a href="#shop">Shop</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram">IG</a>
+      <a href="#" aria-label="TikTok">TT</a>
+      <a href="#" aria-label="Email">✉</a>
+    </div>
+  </div>
+  <p class="footer-fine">© <span id="year"></span> Smile by Smile. All photos used with patient permission.</p>
+</footer>
+
+<!-- ===================== TOAST (donate/buy placeholder feedback) ===================== -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
