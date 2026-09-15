@@ -89,10 +89,12 @@ if (window.gsap) {
     });
   });
 
-  // Total raised bar — a purely visual "funds growing" accent, not tied to any goal
+  // Total raised bar — purely visual, no goal attached.
+  // TODO: bump this width whenever you update data-count-to above, so the bar
+  // keeps reflecting "funds raised" rather than being stuck at one value.
   document.querySelectorAll('[data-raised-fill]').forEach((el) => {
     gsap.to(el, {
-      width: '68%', duration: 1.8, ease: 'power3.out',
+      width: '0%', duration: 1.8, ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 92%', once: true }
     });
   });
