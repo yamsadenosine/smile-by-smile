@@ -63,10 +63,16 @@ button{ font-family:inherit; cursor:pointer; color:inherit; }
     radial-gradient(100% 80% at 90% 15%, #121826 0%, transparent 60%),
     linear-gradient(170deg, var(--bg-0) 0%, #0B0E14 50%, #07080B 100%);
 }
-.orb{ position:absolute; border-radius:50%; filter:blur(110px); }
-.orb-a{ width:44vw; height:44vw; background:var(--slate); top:-14%; left:-12%; opacity:0.32; animation:drift1 28s ease-in-out infinite; }
-.orb-b{ width:36vw; height:36vw; background:var(--accent); bottom:-18%; right:-10%; opacity:0.07; animation:drift2 32s ease-in-out infinite; }
-.orb-c{ width:24vw; height:24vw; background:#5B6C8F; top:38%; right:16%; opacity:0.12; animation:drift1 36s ease-in-out infinite reverse; }
+/* Soft light pools drawn as gradients (a live blur filter here was the biggest cost on phones). */
+.orb{ position:absolute; border-radius:50%; background:radial-gradient(circle, var(--orb) 0%, transparent 68%) !important; }
+.orb-a{ --orb:var(--slate); width:70vw; height:70vw; top:-30%; left:-26%; opacity:0.5; }
+.orb-b{ --orb:var(--accent); width:60vw; height:60vw; bottom:-32%; right:-22%; opacity:0.11; }
+.orb-c{ --orb:#5B6C8F; width:44vw; height:44vw; top:26%; right:6%; opacity:0.2; }
+@media (hover:hover) and (pointer:fine){
+  .orb-a{ animation:drift1 28s ease-in-out infinite; }
+  .orb-b{ animation:drift2 32s ease-in-out infinite; }
+  .orb-c{ animation:drift1 36s ease-in-out infinite reverse; }
+}
 .grain{ position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px); background-size:3px 3px; }
 
 @keyframes drift1{ 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(4%,6%) scale(1.06);} }
@@ -679,6 +685,19 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 }
 .toast.show{ transform:translate(-50%, 0); }
 
+
+/* ---------- phones & tablets: same look, far less GPU work ----------
+   Every frosted surface re-blurs what's behind it each frame something moves.
+   On touch devices: lighter blur, bubbles hold still and fake their glass with gradients. */
+@media (hover:none), (pointer:coarse){
+  .glass{ backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+  .bubble, .glass-bubble{ backdrop-filter:none; -webkit-backdrop-filter:none; background-color:rgba(255,255,255,0.03); }
+  .hero.is-ready .bubble, .glass-bubble{ animation:none; }
+  .fb-wrap{ animation:none !important; }
+  .grain{ display:none; }
+  .intro{ backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); background:rgba(9,11,15,0.9); }
+  .ba-photo, .shop-photo{ filter:none; }
+}
 
 /* ---------- reduced motion: keep fades (they help comprehension), drop movement, loops and 3D ---------- */
 @media (prefers-reduced-motion: reduce){
