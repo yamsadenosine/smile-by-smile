@@ -1,176 +1,181 @@
 document.documentElement.classList.add('js-ready');
 document.getElementById('year').textContent = new Date().getFullYear();
 
+const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const reduceMotion = () => motionQuery.matches;
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+/* Run `cb` once, the first time `el` scrolls into view. */
+function onceInView(el, cb, options = { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }) {
+  if (!('IntersectionObserver' in window)) { cb(el); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      io.unobserve(entry.target);
+      cb(entry.target);
+    });
+  }, options);
+  io.observe(el);
+}
+
+/* Count a number up from 0. Under reduced motion it just lands on the value. */
+function countUp(el, target, { prefix = '', duration = 1200 } = {}) {
+  const format = (n) => prefix + Math.round(n).toLocaleString('en-US');
+  if (reduceMotion() || target === 0) { el.textContent = format(target); return; }
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    el.textContent = format(target * easeOutCubic(t));
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 /* =========================================================
    Mobile nav
    ========================================================= */
 const navBurger = document.getElementById('navBurger');
 const navMobile = document.getElementById('navMobile');
-navBurger.addEventListener('click', () => {
-  const open = navMobile.classList.toggle('open');
+function setNav(open) {
+  navMobile.classList.toggle('open', open);
   navBurger.setAttribute('aria-expanded', String(open));
-});
-navMobile.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-  navMobile.classList.remove('open');
-  navBurger.setAttribute('aria-expanded', 'false');
-}));
+}
+navBurger.addEventListener('click', () => setNav(!navMobile.classList.contains('open')));
+navMobile.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNav(false)));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setNav(false); });
 
 /* =========================================================
-   Before / After gallery: tap the photo to reveal the after
-   (and swap the caption to the matching clinical description)
+   Section reveals: each .reveal fades up as it enters view,
+   staggered by its order inside its section.
    ========================================================= */
-function initBeforeAfterTap(root) {
-  const beforeImg = root.querySelector('[data-ba-before]');
-  const afterImg = root.querySelector('[data-ba-after]');
-  const stateTag = root.querySelector('[data-ba-state-tag]');
-  const hint = root.querySelector('[data-ba-hint]');
-  const desc = root.closest('.ba-card')?.querySelector('[data-ba-desc]');
-  let showingAfter = false;
+document.querySelectorAll('section').forEach((section) => {
+  section.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.setProperty('--i', Math.min(i, 4));
+  });
+});
+// The hero is always on screen at load, so it animates in right away.
+requestAnimationFrame(() => {
+  document.querySelectorAll('#hero .reveal').forEach((el) => el.classList.add('is-in'));
+});
+document.querySelectorAll('main section:not(#hero) .reveal').forEach((el) => {
+  onceInView(el, (target) => target.classList.add('is-in'), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+});
 
-  function render() {
-    beforeImg.classList.toggle('is-visible', !showingAfter);
-    afterImg.classList.toggle('is-visible', showingAfter);
-    if (stateTag) {
-      stateTag.textContent = showingAfter ? 'After' : 'Before';
-      stateTag.classList.toggle('is-after', showingAfter);
+/* =========================================================
+   Two-state toggle: a tappable stage with stacked images
+   plus a segmented control. Used by Before/After and the
+   crewneck Front/Back.
+   ========================================================= */
+function initTwoStateToggle(root, { stage, faces, onChange }) {
+  const seg = root.querySelector('[data-seg]');
+  const options = seg ? Array.from(seg.querySelectorAll('[data-seg-option]')) : [];
+  let state = 0;
+
+  function set(next) {
+    if (next === state) return;
+    state = next;
+    faces.forEach((face, i) => face.classList.toggle('is-visible', i === state));
+    if (seg) seg.dataset.state = String(state);
+    options.forEach((opt, i) => opt.setAttribute('aria-pressed', String(i === state)));
+    onChange?.(state);
+  }
+
+  stage?.addEventListener('click', () => set(state === 0 ? 1 : 0));
+  options.forEach((opt, i) => opt.addEventListener('click', () => set(i)));
+}
+
+/* Before / After cards: the clinical caption swaps with a quick blur crossfade. */
+document.querySelectorAll('[data-ba]').forEach((card) => {
+  const stage = card.querySelector('[data-ba-stage]');
+  const desc = card.querySelector('[data-ba-desc]');
+  const faces = [card.querySelector('[data-ba-before]'), card.querySelector('[data-ba-after]')];
+  const patient = stage.getAttribute('aria-label').split(':')[0];
+
+  initTwoStateToggle(card, {
+    stage,
+    faces,
+    onChange(state) {
+      card.classList.add('has-interacted');
+      stage.setAttribute('aria-label', `${patient}: show ${state ? 'before' : 'after'} treatment`);
+      if (!desc) return;
+      const nextText = state ? desc.dataset.afterText : desc.dataset.beforeText;
+      if (reduceMotion()) { desc.textContent = nextText; return; }
+      desc.classList.add('is-swapping');
+      clearTimeout(desc._t);
+      desc._t = setTimeout(() => {
+        desc.textContent = nextText;
+        desc.classList.remove('is-swapping');
+      }, 160);
     }
-    if (hint) hint.textContent = showingAfter ? 'Tap to see before ↻' : 'Tap to see after ↻';
-    if (desc) desc.textContent = showingAfter ? desc.dataset.afterText : desc.dataset.beforeText;
-    root.setAttribute('aria-pressed', String(showingAfter));
-  }
-
-  root.addEventListener('click', () => {
-    showingAfter = !showingAfter;
-    render();
   });
+});
 
-  render();
-}
-document.querySelectorAll('[data-ba-tap]').forEach(initBeforeAfterTap);
-
-/* =========================================================
-   GSAP: scroll reveals + counters
-   ========================================================= */
-if (window.gsap) {
-  gsap.registerPlugin(ScrollTrigger);
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!reduceMotion) {
-    document.querySelectorAll('.reveal').forEach((el) => {
-      gsap.fromTo(el, { opacity: 0, y: 24 }, {
-        opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' }
-      });
-    });
-  } else {
-    document.querySelectorAll('.reveal').forEach(el => el.style.opacity = 1);
-  }
-
-  // Hero stat counters
-  document.querySelectorAll('[data-count]').forEach((el) => {
-    const target = parseFloat(el.dataset.count);
-    const counter = { val: 0 };
-    gsap.to(counter, {
-      val: target, duration: 1.6, ease: 'power2.out',
-      onUpdate: () => el.textContent = Math.round(counter.val),
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true }
-    });
-  });
-
-  // Total raised counter
-  document.querySelectorAll('[data-count-to]').forEach((el) => {
-    const target = parseFloat(el.dataset.countTo);
-    const prefix = el.dataset.prefix ?? '$';
-    const counter = { val: 0 };
-    gsap.to(counter, {
-      val: target, duration: 1.8, ease: 'power3.out',
-      onUpdate: () => el.textContent = prefix + Math.round(counter.val).toLocaleString('en-US'),
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true }
-    });
-  });
-
-  // Total raised bar — computed automatically from the raised total above.
-  // No goal involved: it fills as progress toward funding the *next* $500
-  // patient (and reads as full right when a patient just got funded).
-  const raisedNumEl = document.querySelector('[data-count-to]');
-  const raisedFillEl = document.querySelector('[data-raised-fill]');
-  if (raisedNumEl && raisedFillEl) {
-    const PATIENT_COST = 500;
-    const raised = parseFloat(raisedNumEl.dataset.countTo) || 0;
-    const remainder = raised % PATIENT_COST;
-    const fillPct = raised > 0 && remainder === 0 ? 100 : (remainder / PATIENT_COST) * 100;
-    gsap.to(raisedFillEl, {
-      width: fillPct + '%', duration: 1.8, ease: 'power3.out',
-      scrollTrigger: { trigger: raisedFillEl, start: 'top 92%', once: true }
-    });
-  }
-}
-
-/* =========================================================
-   Shop: front/back scroll carousel + color swatches
-   ========================================================= */
+/* Crewneck: tap the photo or use Front/Back. */
 document.querySelectorAll('[data-shop-product]').forEach((card) => {
-  const scrollEl = card.querySelector('[data-shop-scroll]');
-  const dots = Array.from(card.querySelectorAll('[data-shop-dot]'));
-  const label = card.querySelector('[data-shop-label]');
-  const prevBtn = card.querySelector('[data-shop-prev]');
-  const nextBtn = card.querySelector('[data-shop-next]');
-  const frontImg = card.querySelector('[data-shop-front]');
-  const backImg = card.querySelector('[data-shop-back]');
-  const swatches = Array.from(card.querySelectorAll('.swatch'));
-  const swatchNameLabel = card.querySelector('[data-swatch-name-label]');
-  if (!scrollEl) return;
-
-  function currentIndex() {
-    const width = scrollEl.clientWidth || 1;
-    return Math.round(scrollEl.scrollLeft / width);
-  }
-  function goTo(index) {
-    scrollEl.scrollTo({ left: index * scrollEl.clientWidth, behavior: 'smooth' });
-  }
-  function syncActive() {
-    const index = currentIndex();
-    dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
-    if (label) label.textContent = index === 0 ? 'Front' : 'Back';
-  }
-
-  // Size the box to match the garment photo's own proportions so there's
-  // no dead gray space around it, no matter how tall/narrow that color's shot is.
-  function fitRatioToImage(img) {
-    if (!img) return;
-    const apply = () => {
-      if (img.naturalWidth && img.naturalHeight) {
-        scrollEl.style.setProperty('--shop-ratio', `${img.naturalWidth} / ${img.naturalHeight}`);
-      }
-    };
-    if (img.complete) apply();
-    else img.addEventListener('load', apply, { once: true });
-  }
-  fitRatioToImage(frontImg);
-
-  scrollEl.addEventListener('scroll', () => {
-    clearTimeout(scrollEl._t);
-    scrollEl._t = setTimeout(syncActive, 80);
-  });
-  dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
-  if (prevBtn) prevBtn.addEventListener('click', () => goTo(Math.max(0, currentIndex() - 1)));
-  if (nextBtn) nextBtn.addEventListener('click', () => goTo(Math.min(1, currentIndex() + 1)));
-
-  swatches.forEach((sw) => {
-    sw.addEventListener('click', () => {
-      swatches.forEach(s => s.classList.remove('is-active'));
-      sw.classList.add('is-active');
-      if (frontImg) frontImg.src = sw.dataset.front;
-      if (backImg) backImg.src = sw.dataset.back;
-      if (swatchNameLabel) swatchNameLabel.textContent = sw.dataset.swatchName;
-      fitRatioToImage(frontImg);
-      goTo(0);
-    });
+  const stage = card.querySelector('[data-shop-stage]');
+  const faces = Array.from(card.querySelectorAll('[data-shop-face]'));
+  initTwoStateToggle(card, {
+    stage,
+    faces,
+    onChange(state) {
+      stage.setAttribute('aria-label', `Show the ${state ? 'front' : 'back'} of the crewneck`);
+    }
   });
 });
 
 /* =========================================================
-   Impact calculator: live donation → smiles-restored visualizer
+   Hero stat counters
+   ========================================================= */
+document.querySelectorAll('[data-count]').forEach((el) => {
+  onceInView(el, () => countUp(el, parseFloat(el.dataset.count) || 0, { duration: 1100 }));
+});
+
+/* =========================================================
+   Total raised: the bar shows progress toward funding the
+   next $500 patient, and fills when it scrolls into view.
+   ========================================================= */
+(function initRaised() {
+  const numEl = document.querySelector('[data-raised]');
+  const meter = document.querySelector('[data-raised-meter]');
+  if (!numEl || !meter) return;
+
+  const PATIENT_COST = 500;
+  const raised = Math.max(0, parseFloat(numEl.dataset.raised) || 0);
+  const funded = Math.floor(raised / PATIENT_COST);
+  const remainder = raised - funded * PATIENT_COST;
+  // Right on a $500 boundary, show the patient just funded as a full bar.
+  const justFunded = raised > 0 && remainder === 0;
+  const pct = justFunded ? 100 : (remainder / PATIENT_COST) * 100;
+
+  const fill = meter.querySelector('[data-raised-fill]');
+  const track = meter.querySelector('[role="progressbar"]');
+  const startLabel = meter.querySelector('[data-raised-start]');
+  const goalLabel = meter.querySelector('[data-raised-goal]');
+  const sub = document.querySelector('[data-raised-sub]');
+
+  const base = justFunded ? (funded - 1) * PATIENT_COST : funded * PATIENT_COST;
+  if (startLabel) startLabel.textContent = '$' + base.toLocaleString('en-US');
+  if (goalLabel) goalLabel.textContent = '$' + (base + PATIENT_COST).toLocaleString('en-US');
+  track?.setAttribute('aria-valuenow', String(Math.round(justFunded ? PATIENT_COST : remainder)));
+
+  if (sub && raised > 0) {
+    const patientsLine = funded > 0
+      ? `<strong>${funded}</strong> full smile${funded > 1 ? 's' : ''} funded so far. `
+      : '';
+    sub.innerHTML = justFunded
+      ? `${patientsLine}Every <strong>$500</strong> funds roughly one patient's full smile.`
+      : `${patientsLine}<strong>$${Math.round(PATIENT_COST - remainder).toLocaleString('en-US')}</strong> to go until the next patient's smile is fully funded.`;
+  }
+
+  onceInView(meter, () => {
+    meter.classList.add('is-in');
+    fill.style.clipPath = `inset(0 ${100 - pct}% 0 0 round 999px)`;
+    countUp(numEl, raised, { prefix: '$', duration: 1400 });
+  }, { threshold: 0.6 });
+})();
+
+/* =========================================================
+   Impact calculator: live donation to smiles-restored visual
    ========================================================= */
 (function initImpactCalculator() {
   const slider = document.querySelector('[data-impact-slider]');
@@ -183,24 +188,22 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
   const captionEl = document.querySelector('[data-impact-caption]');
   const presetChips = Array.from(document.querySelectorAll('[data-impact-preset]'));
   const toothGroups = Array.from(document.querySelectorAll('svg [data-tooth-index]'));
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const FULL_SMILE = 500;
   const TEETH_COUNT = 10;
 
   function sparkleTooth(g) {
+    if (reduceMotion() || !g.animate) return;
     const spark = g.querySelector('.tooth-sparkle');
     const fixedShape = g.querySelector('.tooth-fixed');
-    if (!window.gsap || reduceMotion) return;
-    if (spark) {
-      gsap.fromTo(spark, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, {
-        opacity: 1, scale: 1.3, duration: 0.25, ease: 'power2.out',
-        onComplete: () => gsap.to(spark, { opacity: 0, scale: 0.6, duration: 0.35, delay: 0.05 })
-      });
-    }
-    if (fixedShape) {
-      gsap.fromTo(fixedShape, { scale: 0.85, transformOrigin: '50% 100%' }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
-    }
+    spark?.animate(
+      [{ opacity: 0, transform: 'scale(0.4)' }, { opacity: 1, transform: 'scale(1.2)', offset: 0.4 }, { opacity: 0, transform: 'scale(0.7)' }],
+      { duration: 520, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }
+    );
+    fixedShape?.animate(
+      [{ transform: 'scale(0.9)' }, { transform: 'scale(1)' }],
+      { duration: 320, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }
+    );
   }
 
   function render(amount) {
@@ -230,23 +233,23 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
       if (amount === 0) {
         resultEl.innerHTML = '<span>Move the slider to see exactly what your gift restores.</span>';
       } else if (smilesFunded > 0 && remainderAmount === 0) {
-        resultEl.innerHTML = `<span>🎉 <strong>${smilesFunded}</strong> full smile reconstruction${smilesFunded > 1 ? 's' : ''} funded — every tooth restored.</span>`;
+        resultEl.innerHTML = `<span><strong>${smilesFunded}</strong> full smile reconstruction${smilesFunded > 1 ? 's' : ''} funded. Every tooth restored.</span>`;
       } else if (smilesFunded > 0) {
-        resultEl.innerHTML = `<span>🎉 <strong>${smilesFunded}</strong> full smile${smilesFunded > 1 ? 's' : ''} funded, plus <strong>${teethFixed}</strong> of 10 teeth toward the next.</span>`;
+        resultEl.innerHTML = `<span><strong>${smilesFunded}</strong> full smile${smilesFunded > 1 ? 's' : ''} funded, plus <strong>${teethFixed}</strong> of 10 teeth toward the next.</span>`;
       } else {
-        resultEl.innerHTML = `<span>Restores <strong>${teethFixed}</strong> of 10 teeth for one patient — <strong>${TEETH_COUNT - teethFixed}</strong> more to a full smile.</span>`;
+        resultEl.innerHTML = `<span>Restores <strong>${teethFixed}</strong> of 10 teeth for one patient. <strong>${TEETH_COUNT - teethFixed}</strong> more to a full smile.</span>`;
       }
     }
 
     if (captionEl) {
       if (smilesFunded > 0 && remainderAmount === 0) {
         captionEl.textContent = smilesFunded === 1
-          ? `Patient 1's smile — fully restored!`
-          : `Patients 1–${smilesFunded} — every smile fully restored!`;
+          ? `Patient 1's smile, fully restored.`
+          : `Patients 1 to ${smilesFunded}, every smile fully restored.`;
       } else if (smilesFunded > 0) {
-        captionEl.textContent = `Patient ${smilesFunded + 1}'s smile — restored tooth by tooth as your gift grows.`;
+        captionEl.textContent = `Patient ${smilesFunded + 1}'s smile, restored tooth by tooth as your gift grows.`;
       } else {
-        captionEl.textContent = `One patient's smile — restored tooth by tooth as your gift grows.`;
+        captionEl.textContent = `One patient's smile, restored tooth by tooth as your gift grows.`;
       }
     }
 
@@ -267,22 +270,63 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
 })();
 
 /* =========================================================
-   Give amount chips
+   Chip groups: give amounts and crewneck sizes
    ========================================================= */
-document.querySelectorAll('.give-card').forEach((card) => {
-  const chips = card.querySelectorAll('.chip');
+function initChipGroup(group, onSelect) {
+  const chips = group.querySelectorAll('.chip');
   chips.forEach((chip) => {
     chip.addEventListener('click', () => {
       chips.forEach(c => c.classList.remove('is-active'));
       chip.classList.add('is-active');
-      const donateBtn = card.querySelector('[data-donate-btn]');
-      if (donateBtn) donateBtn.dataset.selectedAmount = chip.dataset.amount;
+      onSelect?.(chip);
     });
   });
+}
+document.querySelectorAll('.give-card').forEach((card) => {
+  const donateBtn = card.querySelector('[data-donate-btn]');
+  initChipGroup(card, (chip) => { if (donateBtn) donateBtn.dataset.selectedAmount = chip.dataset.amount; });
 });
+document.querySelectorAll('[data-size-group]').forEach((group) => initChipGroup(group));
 
 /* =========================================================
-   Donate / Buy — placeholder handlers.
+   About: tap the panel (or the button) to flip to the
+   dentistry side. The hidden face is made inert so it can't
+   be tabbed into or clicked through.
+   ========================================================= */
+(function initAboutFlip() {
+  const flip = document.querySelector('[data-flip]');
+  if (!flip) return;
+  const front = flip.querySelector('[data-flip-face="front"]');
+  const back = flip.querySelector('[data-flip-face="back"]');
+  const toggles = flip.querySelectorAll('[data-flip-toggle]');
+
+  function set(flipped, { moveFocus = false } = {}) {
+    flip.classList.toggle('is-flipped', flipped);
+    front.inert = flipped;
+    back.inert = !flipped;
+    front.setAttribute('aria-hidden', String(flipped));
+    back.setAttribute('aria-hidden', String(!flipped));
+    toggles.forEach(t => t.setAttribute('aria-expanded', String(flipped)));
+    if (moveFocus) (flipped ? back : front).querySelector('[data-flip-toggle]')?.focus({ preventScroll: true });
+  }
+
+  toggles.forEach((t) => t.addEventListener('click', (e) => {
+    e.stopPropagation();
+    set(!flip.classList.contains('is-flipped'), { moveFocus: true });
+  }));
+
+  // Tapping anywhere on the card flips it, except on links, buttons, or while selecting text.
+  [front, back].forEach((face) => face.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;
+    if (window.getSelection()?.toString()) return;
+    set(!flip.classList.contains('is-flipped'));
+  }));
+
+  set(false);
+})();
+
+/* =========================================================
+   Donate / Buy: placeholder handlers.
    Swap these for real Stripe/PayPal/Shopify calls later.
    ========================================================= */
 function showToast(message) {
@@ -297,31 +341,26 @@ function handleDonate(freq, amount) {
   // TODO: replace with real payment integration, e.g.:
   //   Stripe:  stripe.redirectToCheckout({ ... })
   //   PayPal:  paypal.Buttons({ ... }).render(...)
-  showToast(`💛 ${freq} gift${amount ? ` of $${amount}` : ''} — payment integration coming soon!`);
+  showToast(`${freq} gift${amount ? ` of $${amount}` : ''}: secure checkout is coming soon.`);
 }
 
-function handleGiftClaim(product, threshold) {
-  // Nonprofits can't sell merch for profit — these are thank-you gifts tied to a
-  // donation tier, not a purchase. TODO: replace with your real donation + fulfillment
-  // flow (e.g. a Stripe Checkout with a note field, or a form after donating).
-  showToast(`🎁 Donate $${threshold}+ and we'll send you a "${product}" as a thank-you!`);
+function handleBuy(product, price, size) {
+  // TODO: replace with a real checkout (Stripe Payment Link, Shopify Buy Button, etc.)
+  showToast(`${product} (${size}), $${price}: checkout is coming soon.`);
 }
 
 document.querySelectorAll('[data-donate-btn]').forEach((btn) => {
   btn.addEventListener('click', () => {
-    const freq = btn.dataset.freq;
     const amount = btn.dataset.selectedAmount;
-    handleDonate(freq, amount && amount !== 'custom' ? amount : null);
+    handleDonate(btn.dataset.freq, amount && amount !== 'custom' ? amount : null);
   });
 });
 
-document.querySelectorAll('[data-gift-btn]').forEach((btn) => {
+document.querySelectorAll('[data-buy-btn]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const card = btn.closest('[data-shop-product]');
-    const activeSwatch = card?.querySelector('.swatch.is-active');
-    const colorName = activeSwatch?.dataset.swatchName;
-    const product = colorName ? `${btn.dataset.product} — ${colorName}` : btn.dataset.product;
-    handleGiftClaim(product, btn.dataset.threshold);
+    const size = card?.querySelector('[data-size].is-active')?.dataset.size || 'M';
+    handleBuy(btn.dataset.product, btn.dataset.price, size);
   });
 });
 
@@ -352,7 +391,7 @@ Submitted by: ${data.referrerName}
 Referrer contact: ${data.referrerContact}`;
 
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  showToast('✉ Opening your email app to send this referral…');
+  showToast('Opening your email app to send this referral...');
   window.location.href = mailtoUrl;
 }
 
