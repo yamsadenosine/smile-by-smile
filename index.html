@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 
-<link rel="stylesheet" href="css/style.css?v=2026-10-02">
+<link rel="stylesheet" href="css/style.css?v=2026-10-02b">
 </head>
 <body>
 
@@ -81,9 +81,14 @@
 <section id="hero" class="hero">
   <div class="hero-inner">
     <p class="eyebrow reveal">Restoring Confidence, One Smile at a Time</p>
-    <h1 class="hero-title reveal">
-      Smile <span class="soft">by</span> Smile
+    <h1 class="hero-title" data-hero-title aria-label="Smile by Smile">
+      <span class="ht-word" aria-hidden="true">Smile</span>
+      <span class="ht-word soft" aria-hidden="true">by</span>
+      <span class="ht-word" aria-hidden="true">Smile</span>
     </h1>
+    <svg class="hero-smile" viewBox="0 0 240 44" aria-hidden="true" focusable="false">
+      <path d="M10 8 Q120 66 230 8" pathLength="1"></path>
+    </svg>
     <p class="hero-sub reveal">
       Free dental reconstructions for underprivileged people overseas who have
       never sat in a dentist's chair. Fully sponsored, patient by patient.
@@ -106,8 +111,11 @@
     </div>
   </div>
 
-  <div class="hero-glass-shard shard-1" aria-hidden="true"></div>
-  <div class="hero-glass-shard shard-2" aria-hidden="true"></div>
+  <div class="hero-bubbles" aria-hidden="true">
+    <div class="bubble-layer" data-parallax="18"><span class="bubble b1"></span></div>
+    <div class="bubble-layer" data-parallax="-26"><span class="bubble b2"></span></div>
+    <div class="bubble-layer" data-parallax="34"><span class="bubble b3"></span></div>
+  </div>
 </section>
 
 <!-- ===================== 2. BEFORE / AFTER GALLERY ===================== -->
@@ -196,7 +204,7 @@
     </p>
   </div>
 
-  <div class="progress-case-grid">
+  <div class="progress-case-grid is-single">
     <article class="glass progress-case reveal">
       <div class="progress-case-media">
         <img src="assets/img/inprogress-1.jpg" alt="In-progress dental case, before treatment" draggable="false" loading="lazy">
@@ -207,32 +215,21 @@
       </div>
     </article>
 
-    <div class="glass donation-cta reveal">
-      <span class="icon-tile"><i class="ph ph-tooth" aria-hidden="true"></i></span>
-      <h3>Every Case Starts With a Yes</h3>
-      <p>Donors are what move a patient from in progress to a finished smile. Your gift could fund the very next step.</p>
-      <a href="#give" class="btn btn-outline btn-block">Fund the Next Step</a>
-    </div>
   </div>
 </section>
 
 <!-- ===================== 3. FUNDS RAISED ===================== -->
-<!-- To update the total: change data-raised below (in dollars). Everything else is computed. -->
+<!-- To update the all-time total: change data-raised below (in dollars). Everything else is computed. -->
 <section id="donate-bar" class="section">
   <div class="glass raised-panel reveal">
-    <p class="eyebrow">Together, so far</p>
+    <p class="eyebrow">All time</p>
     <h2>Total Raised</h2>
     <span class="raised-num" data-raised="1650">$0</span>
 
-    <div class="raised-meter" data-raised-meter>
-      <div class="raised-track" role="progressbar" aria-label="Progress toward funding the next patient" aria-valuemin="0" aria-valuemax="500" aria-valuenow="0">
-        <div class="raised-fill" data-raised-fill></div>
-        <span class="raised-shine" aria-hidden="true"></span>
-      </div>
-      <div class="raised-scale"><span data-raised-start>$0</span><span data-raised-goal>$500</span></div>
-    </div>
+    <!-- One segment per $500 smile. Filled when funded, the last one fills as gifts come in. -->
+    <ol class="milestones" data-milestones aria-label="Smiles funded so far"></ol>
 
-    <p class="raised-sub" data-raised-sub>Every <strong>$500</strong> funds roughly one patient's full smile. Be one of the first to help us get there.</p>
+    <p class="raised-sub" data-raised-sub>Every <strong>$500</strong> funds one patient's full smile.</p>
   </div>
 </section>
 
@@ -243,151 +240,30 @@
     <p class="section-sub">Every contribution, however small or often, goes directly to a patient's reconstruction. Pick what fits your rhythm.</p>
   </div>
 
-  <!-- ===== Impact Calculator: live "how far does this go" visualizer ===== -->
-  <div class="glass impact-panel reveal">
-    <div class="impact-grid">
+  <!-- ===== Smile builder: tap decayed teeth to restore them. Teeth are drawn by js/main.js ===== -->
+  <div class="glass smile-builder reveal" data-smile-builder>
+    <div class="sb-stage">
+      <svg class="sb-arch" viewBox="0 0 600 250" role="group" aria-label="Upper smile. Tap a tooth to restore it." data-sb-svg></svg>
+      <p class="sb-hint" data-sb-hint><i class="ph ph-hand-tap" aria-hidden="true"></i> Tap a tooth to restore it</p>
+    </div>
 
-      <div class="impact-controls">
-        <h3>Move the Slider. Watch the Smile Come Together.</h3>
-        <p>A full smile reconstruction costs about <strong>$500</strong>. Smaller gifts still fund real care: a few teeth, an extraction, a root canal.</p>
-
-        <div class="impact-amount">
-          <span class="impact-amount-num">$<span data-impact-amount-num>150</span></span>
-          <span class="impact-amount-freq">one-time gift</span>
+    <div class="sb-panel">
+      <div class="sb-readout">
+        <div>
+          <span class="sb-label">Teeth restored</span>
+          <span class="sb-value"><span data-sb-count>0</span><span class="sb-of"> / 10</span></span>
         </div>
-
-        <input type="range" class="impact-slider" min="0" max="1500" step="5" value="150" data-impact-slider aria-label="Donation amount">
-
-        <div class="impact-presets">
-          <button class="chip" data-impact-preset="25">$25</button>
-          <button class="chip" data-impact-preset="100">$100</button>
-          <button class="chip is-active" data-impact-preset="150">$150</button>
-          <button class="chip" data-impact-preset="500">$500</button>
-          <button class="chip" data-impact-preset="1000">$1,000</button>
+        <div>
+          <span class="sb-label">Your gift</span>
+          <span class="sb-value">$<span data-sb-amount>0</span></span>
         </div>
-
-        <div class="impact-result" data-impact-result>
-          <span>Restores <strong>3</strong> of 10 teeth for one patient. <strong>7</strong> more to a full smile.</span>
-        </div>
-
-        <button class="btn btn-accent" data-impact-donate><span>Donate $<span data-impact-donate-amount>150</span> Now</span></button>
       </div>
-
-      <div class="impact-visual">
-        <svg viewBox="0 0 480 220" role="img" aria-label="Illustration of ten broken, decayed teeth that turn into a clean white restored smile as the donation amount increases">
-          <defs>
-            <linearGradient id="rotGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#8a7a4e"></stop>
-              <stop offset="40%" stop-color="#6b5636"></stop>
-              <stop offset="75%" stop-color="#4a3a22"></stop>
-              <stop offset="100%" stop-color="#3a2c1a"></stop>
-            </linearGradient>
-          </defs>
-          <ellipse cx="250" cy="205" rx="190" ry="9" fill="#000" opacity="0.35"></ellipse>
-
-          <g data-tooth-index="0" transform="translate(55,80) rotate(-14)">
-            <path class="tooth-damaged" d="M-15,60 L-15,9 L-7,2 L-2,10 L4,1 L11,7 L15,3 L15,60 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="-3" cy="24" r="4.5" fill="#241b10"></circle>
-              <circle cx="5" cy="42" r="2.8" fill="#5a4a26"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-15" y="0" width="30" height="60" rx="11"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,26)"></path>
-          </g>
-
-          <g data-tooth-index="1" transform="translate(100,100) rotate(-11)">
-            <path class="tooth-damaged" d="M-16,70 L-16,10 L-8,2 L-2,11 L4,1 L10,8 L16,4 L16,70 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="6" cy="30" r="4" fill="#5a4a26"></circle>
-              <path d="M-4,14 L2,30 L-3,48" stroke="#241b10" stroke-width="1.3" fill="none" stroke-linecap="round"></path>
-            </g>
-            <rect class="tooth-fixed" x="-16" y="0" width="32" height="70" rx="12"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,32)"></path>
-          </g>
-
-          <!-- broken/chipped tooth -->
-          <g data-tooth-index="2" transform="translate(145,114) rotate(-8)">
-            <path class="tooth-damaged" d="M-17,77 L-17,8 L-9,1 L-2,19 L5,2 L17,9 L17,77 Z"></path>
-            <g class="tooth-damage-marks">
-              <path d="M-6,10 L-2,19 L2,9 Z" fill="#1a1108"></path>
-              <circle cx="-8" cy="45" r="4" fill="#5a4a26"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-17" y="0" width="34" height="77" rx="13"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,36)"></path>
-          </g>
-
-          <g data-tooth-index="3" transform="translate(190,124) rotate(-5)">
-            <path class="tooth-damaged" d="M-18.5,82 L-18.5,11 L-9,2 L-2,12 L5,1 L12,9 L18.5,4 L18.5,82 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="-9" cy="50" r="5" fill="#5a4a26"></circle>
-              <circle cx="8" cy="28" r="3" fill="#6b7a3a"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-18.5" y="0" width="37" height="82" rx="14"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,38)"></path>
-          </g>
-
-          <g data-tooth-index="4" transform="translate(235,129) rotate(-2)">
-            <path class="tooth-damaged" d="M-19.5,85 L-19.5,10 L-9,2 L-2,11 L5,1 L13,8 L19.5,3 L19.5,85 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="3" cy="55" r="5.5" fill="#241b10"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-19.5" y="0" width="39" height="85" rx="15"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,40)"></path>
-          </g>
-
-          <g data-tooth-index="5" transform="translate(279,129) rotate(2)">
-            <path class="tooth-damaged" d="M-19.5,85 L-19.5,4 L-12,9 L-5,1 L2,12 L9,2 L19.5,10 L19.5,85 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="-6" cy="38" r="4.5" fill="#5a4a26"></circle>
-              <path d="M5,15 L-2,42 L4,68" stroke="#241b10" stroke-width="1.3" fill="none" stroke-linecap="round"></path>
-            </g>
-            <rect class="tooth-fixed" x="-19.5" y="0" width="39" height="85" rx="15"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,40)"></path>
-          </g>
-
-          <g data-tooth-index="6" transform="translate(323,124) rotate(5)">
-            <path class="tooth-damaged" d="M-18.5,82 L-18.5,5 L-11,9 L-4,1 L3,12 L10,2 L18.5,11 L18.5,82 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="10" cy="48" r="4" fill="#6b7a3a"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-18.5" y="0" width="37" height="82" rx="14"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,38)"></path>
-          </g>
-
-          <!-- broken/chipped tooth -->
-          <g data-tooth-index="7" transform="translate(368,114) rotate(8)">
-            <path class="tooth-damaged" d="M-17,77 L-17,9 L-5,2 L2,19 L9,1 L17,8 L17,77 Z"></path>
-            <g class="tooth-damage-marks">
-              <path d="M6,9 L2,19 L-2,10 Z" fill="#1a1108"></path>
-              <circle cx="8" cy="48" r="4" fill="#5a4a26"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-17" y="0" width="34" height="77" rx="13"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,36)"></path>
-          </g>
-
-          <g data-tooth-index="8" transform="translate(413,100) rotate(11)">
-            <path class="tooth-damaged" d="M-16,70 L-16,4 L-10,8 L-4,1 L2,11 L8,2 L16,10 L16,70 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="-7" cy="28" r="4" fill="#5a4a26"></circle>
-              <circle cx="5" cy="52" r="3" fill="#241b10"></circle>
-            </g>
-            <rect class="tooth-fixed" x="-16" y="0" width="32" height="70" rx="12"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,32)"></path>
-          </g>
-
-          <g data-tooth-index="9" transform="translate(458,80) rotate(14)">
-            <path class="tooth-damaged" d="M-15,60 L-15,3 L-11,7 L-4,1 L2,10 L7,2 L15,9 L15,60 Z"></path>
-            <g class="tooth-damage-marks">
-              <circle cx="4" cy="26" r="3.8" fill="#5a4a26"></circle>
-              <path d="M-3,10 L3,28" stroke="#241b10" stroke-width="1.2" fill="none" stroke-linecap="round"></path>
-            </g>
-            <rect class="tooth-fixed" x="-15" y="0" width="30" height="60" rx="11"></rect>
-            <path class="tooth-sparkle" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z" transform="translate(0,26)"></path>
-          </g>
-        </svg>
-        <p class="impact-visual-caption" data-impact-caption>One patient's smile, restored tooth by tooth as your gift grows.</p>
+      <p class="sb-message" data-sb-message aria-live="polite">Each tooth costs about <strong>$50</strong> to restore. Ten teeth make a full smile.</p>
+      <div class="sb-actions">
+        <button type="button" class="btn btn-ghost" data-sb-all>Restore Full Smile</button>
+        <button type="button" class="btn btn-outline" data-sb-reset>Reset</button>
       </div>
-
+      <button type="button" class="btn btn-accent btn-block btn-lg" data-sb-donate disabled>Pick Teeth to Restore</button>
     </div>
   </div>
 
@@ -480,7 +356,10 @@
         <textarea name="situation" rows="4" required placeholder="What dental issues are they facing? How long has it been going on? Anything else we should know."></textarea>
       </label>
     </div>
-    <button type="submit" class="btn btn-accent btn-block">Send Referral</button>
+    <!-- spam trap: real people never see or fill this -->
+    <input type="text" name="_honey" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button type="submit" class="btn btn-accent btn-block" data-refer-submit>Send Referral</button>
+    <p class="refer-status" data-refer-status role="status" aria-live="polite"></p>
   </form>
 </section>
 
@@ -520,10 +399,8 @@
         <button class="chip" type="button" data-size="S">S</button>
         <button class="chip is-active" type="button" data-size="M">M</button>
         <button class="chip" type="button" data-size="L">L</button>
-        <button class="chip" type="button" data-size="XL">XL</button>
-        <button class="chip" type="button" data-size="XXL">XXL</button>
       </div>
-      <button class="btn btn-accent btn-block btn-lg" type="button" data-buy-btn data-product="Smile by Smile Crewneck" data-price="55">Get Yours for $55</button>
+      <button class="btn btn-accent btn-block btn-lg" type="button" data-buy-btn data-product="Smile by Smile Crewneck" data-price="55">Save a Smile</button>
     </div>
   </article>
 </section>
@@ -560,18 +437,18 @@
 
     <div class="glass about-panel about-back-panel about-face about-back" data-flip-face="back" id="aboutBack">
       <div class="about-back-photo">
-        <img src="assets/img/about-dentistry.jpg" alt="Yammin in the dental simulation lab, smiling and pointing to a rubber dam he placed on a practice model" loading="lazy">
+        <img src="assets/img/about-dentistry.jpg" alt="Yammin smiling and pointing to a rubber dam on a dental practice model" loading="lazy">
       </div>
       <div class="about-copy">
         <h2>On the path to dentistry</h2>
         <p>
-          I'm on the journey toward a career in dentistry. Every hour in the lab,
-          every rubber dam and every prep, is training for the work Smile by Smile
-          exists to do.
+          I'm on the journey toward a career in dentistry, and I already know how
+          meaningful a life of service is.
         </p>
         <p>
-          A life of service is the most fulfilling life I know. Being able to use what
-          I learn to give someone back their smile is what makes the long hours meaningful.
+          Being the reason someone is able to eat the foods they love, smile at the
+          people they love, and get another shot at happiness. That's the highest
+          honor I could ask for.
         </p>
         <blockquote class="about-quote">
           "Knowledge gives life to nations."
@@ -615,6 +492,6 @@
 <!-- ===================== TOAST (donate/buy placeholder feedback) ===================== -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/main.js?v=2026-10-02"></script>
+<script src="js/main.js?v=2026-10-02b"></script>
 </body>
 </html>
