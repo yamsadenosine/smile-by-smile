@@ -370,8 +370,6 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .milestones{
   list-style:none; padding:0; margin:0 auto 18px; max-width:520px;
   display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:8px;
-  -webkit-mask-image:linear-gradient(90deg, #000 82%, transparent);
-          mask-image:linear-gradient(90deg, #000 82%, transparent);
 }
 .milestone{ display:flex; flex-direction:column; align-items:center; gap:10px; min-width:0; }
 .ms-icon{
@@ -394,7 +392,8 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .milestones.is-in .is-done .ms-label{ color:var(--muted); }
 .milestones.is-in .is-current .ms-icon{ border-color:var(--accent-line); color:var(--accent); }
 .milestones.is-in .is-current .ms-label{ color:var(--accent); }
-.milestone.is-ghost{ opacity:0.5; }
+.milestone.is-ghost{ opacity:0.55; }
+.milestone-block{ margin:0 0 12px; font-size:0.78rem; font-weight:600; color:var(--faint); letter-spacing:0.02em; }
 .raised-sub{ margin:0 auto; color:var(--muted); font-size:0.9rem; max-width:420px; line-height:1.55; }
 .raised-sub strong{ color:var(--ink); }
 

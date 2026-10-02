@@ -227,17 +227,22 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
   if (!numEl || !list) return;
 
   const PATIENT_COST = 500;
-  const MAX_DONE_SHOWN = 5;
+  const BLOCK = 5;
+  const blockLabel = document.querySelector('[data-milestone-block]');
   const raised = Math.max(0, parseFloat(numEl.dataset.raised) || 0);
   const funded = Math.floor(raised / PATIENT_COST);
   const remainder = raised - funded * PATIENT_COST;
   const pct = (remainder / PATIENT_COST) * 100;
 
-  const first = Math.max(0, funded - MAX_DONE_SHOWN);
+  // Show the block of five that holds the smile in progress: 1-5, then 6-10, 11-15...
+  const blockStart = Math.floor(funded / BLOCK) * BLOCK; // smiles before this block are all funded
   const segments = [];
-  for (let n = first; n < funded; n++) segments.push({ n: n + 1, kind: 'done', rest: 0 });
-  segments.push({ n: funded + 1, kind: 'current', rest: 100 - pct });
-  segments.push({ n: funded + 2, kind: 'ghost', rest: 100 });
+  for (let n = blockStart + 1; n <= blockStart + BLOCK; n++) {
+    if (n <= funded) segments.push({ n, kind: 'done', rest: 0 });
+    else if (n === funded + 1) segments.push({ n, kind: 'current', rest: 100 - pct });
+    else segments.push({ n, kind: 'ghost', rest: 100 });
+  }
+  if (blockLabel) blockLabel.textContent = `Smiles ${blockStart + 1} to ${blockStart + BLOCK}`;
 
   list.innerHTML = segments.map((seg, i) => {
     const showPct = seg.kind === 'current' && pct > 0;
@@ -248,7 +253,7 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     const sr = seg.kind === 'done' ? `Smile ${seg.n} funded`
       : seg.kind === 'current' ? `Smile ${seg.n}, ${Math.round(pct)}% funded`
       : `Smile ${seg.n}, not started`;
-    return `<li class="milestone is-${seg.kind}" style="--i:${i};--rest:${seg.rest}%" ${seg.kind === 'ghost' ? 'aria-hidden="true"' : ''}>
+    return `<li class="milestone is-${seg.kind}" style="--i:${i};--rest:${seg.rest}%">
       <span class="ms-icon" aria-hidden="true">${iconHtml}</span>
       <span class="ms-bar" aria-hidden="true"><span class="ms-fill"></span></span>
       <span class="ms-label" aria-hidden="true">${label}</span>
@@ -293,16 +298,16 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
   // [name, outline, visible width, crown height, crown top y, damage]
   // keep: how much of the crown survives (0-1); lesion: [x, y, size] as fractions of the tooth
   const SPEC = [
-    ['upper right second premolar', 'premolar', 30, 54, 64, { keep: 0.2 }],
-    ['upper right first premolar', 'premolar', 35, 60, 70, { keep: 0.74, lesion: [0.05, 0.52, 0.5] }],
+    ['upper right second premolar', 'premolar', 30, 50, 64, { keep: 0.2 }],
+    ['upper right first premolar', 'premolar', 35, 56, 70, { keep: 0.74, lesion: [0.05, 0.52, 0.5] }],
     ['upper right canine', 'canine', 42, 76, 76, { keep: 0.88, cervical: true, lesion: [-0.25, 0.62, 0.32] }],
     ['upper right lateral incisor', 'lateral', 48, 66, 82, { keep: 0.36 }],
     ['upper right central incisor', 'central', 62, 80, 78, { keep: 0.64, lesion: [0.3, 0.42, 0.42] }],
     ['upper left central incisor', 'central', 62, 80, 78, { keep: 0.95, cervical: true, lesion: [0.12, 0.55, 0.5] }],
     ['upper left lateral incisor', 'lateral', 48, 66, 82, { keep: 0.6, lesion: [0.28, 0.4, 0.4] }],
     ['upper left canine', 'canine', 42, 76, 76, { keep: 0.76 }],
-    ['upper left first premolar', 'premolar', 35, 60, 70, { keep: 0.84, cervical: true }],
-    ['upper left second premolar', 'premolar', 30, 54, 64, { keep: 0.5, lesion: [0, 0.35, 0.45] }],
+    ['upper left first premolar', 'premolar', 35, 56, 70, { keep: 0.84, cervical: true }],
+    ['upper left second premolar', 'premolar', 30, 50, 64, { keep: 0.5, lesion: [0, 0.35, 0.45] }],
   ];
   const TILT = [0, 1.5, 3, 4.5, 6];
 
@@ -330,8 +335,10 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
       'C', [.05, 1.01], [-.2, .99], [-.34, .94], 'C', [-.46, .88], [-.5, .78], [-.5, .64], 'C', [-.5, .42], [-.44, .2], [-.36, 0]],
     canine: [[-.36, 0], 'L', [.36, 0], 'C', [.46, .22], [.52, .45], [.5, .62], 'C', [.46, .76], [.22, .9], [.04, 1],
       'C', [-.18, .93], [-.4, .84], [-.48, .72], 'C', [-.53, .52], [-.46, .22], [-.36, 0]],
-    premolar: [[-.36, 0], 'L', [.36, 0], 'C', [.46, .2], [.52, .45], [.48, .66], 'C', [.42, .82], [.2, .95], [0, 1],
-      'C', [-.2, .95], [-.42, .82], [-.48, .66], 'C', [-.52, .45], [-.46, .2], [-.36, 0]],
+    // Bicuspids: broad, blunt biting edge with only a soft rise at the buccal cusp (not pointed like a canine).
+    premolar: [[-.36, 0], 'L', [.36, 0], 'C', [.46, .2], [.5, .45], [.5, .7], 'C', [.5, .84], [.44, .91], [.3, .94],
+      'C', [.16, .96], [.07, 1], [0, 1], 'C', [-.07, 1], [-.16, .96], [-.3, .94], 'C', [-.44, .91], [-.5, .84], [-.5, .7],
+      'C', [-.5, .45], [-.46, .2], [-.36, 0]],
   };
   function outlinePath(type, w, h, m) {
     let d = '';
