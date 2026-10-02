@@ -38,12 +38,12 @@
 
 *{ box-sizing:border-box; }
 html{ scroll-behavior:smooth; scroll-padding-top:96px; }
+html, body{ overflow-x:hidden; overflow-x:clip; } /* clip: no sideways scrolling at all, even programmatic */
 body{
   margin:0;
   font-family:'DM Sans', system-ui, sans-serif;
   background:var(--bg-0);
   color:var(--ink);
-  overflow-x:hidden;
   min-height:100dvh;
   -webkit-tap-highlight-color:transparent;
 }
@@ -198,7 +198,7 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 /* floating glass bubbles: real backdrop blur over the background orbs */
 .hero-bubbles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1; }
 .bubble-layer{ position:absolute; inset:0; }
-.bubble{
+.bubble, .glass-bubble{
   position:absolute; border-radius:50%;
   background:
     radial-gradient(circle at 30% 24%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 32%, rgba(255,255,255,0.02) 62%),
@@ -206,6 +206,8 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
   border:1px solid rgba(255,255,255,0.16);
   backdrop-filter:blur(12px) saturate(160%); -webkit-backdrop-filter:blur(12px) saturate(160%);
   box-shadow:inset -8px -12px 26px rgba(9,11,15,0.35), inset 4px 6px 14px rgba(255,255,255,0.1), 0 24px 60px rgba(3,5,10,0.45);
+}
+.bubble{
   opacity:0; transform:scale(0.9);
   transition:opacity 1200ms var(--ease-out), transform 1400ms var(--ease-out);
 }
@@ -213,6 +215,17 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .b1{ width:190px; height:190px; top:17%; left:6%; }
 .b2{ width:120px; height:120px; bottom:15%; right:8%; transition-delay:150ms; animation-duration:13s !important; }
 .b3{ width:64px; height:64px; top:24%; right:19%; transition-delay:300ms; animation-duration:9s !important; }
+/* floating glass bubbles between sections: bob in place, and drift with scroll where supported */
+.float-bubbles{ position:absolute; inset:0; pointer-events:none; z-index:-1; }
+.fb-wrap{ position:absolute; width:var(--d); height:var(--d); }
+.glass-bubble{ inset:0; animation:bob var(--bob, 11s) ease-in-out infinite; }
+@supports (animation-timeline: view()){
+  .fb-wrap{ animation:fbDrift linear both; animation-timeline:view(); }
+  @keyframes fbDrift{ from{ transform:translateY(46px); } to{ transform:translateY(-46px); } }
+}
+@media (max-width:760px){
+  .fb-wrap{ width:calc(var(--d) * 0.6); height:calc(var(--d) * 0.6); }
+}
 @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-14px); } }
 @media (max-width:760px){
   .b1{ width:120px; height:120px; top:9%; left:-34px; }
@@ -323,7 +336,15 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 
 /* ---------- in-progress ---------- */
 .progress-case-grid{ display:grid; grid-template-columns:1fr; gap:24px; }
-.progress-case-grid.is-single{ max-width:760px; margin:0 auto; }
+.progress-case-grid.is-single{ max-width:720px; margin:0 auto; }
+#in-progress, #donate-bar{ padding-block:clamp(44px, 6vw, 72px); }
+#in-progress .section-head{ margin-bottom:28px; }
+.progress-case.is-compact{ display:grid; grid-template-columns:minmax(0, 0.9fr) minmax(0, 1fr); gap:6px 18px; align-items:center; }
+.progress-case.is-compact .progress-case-body{ padding:8px 10px 8px 0; }
+@media (max-width:620px){
+  .progress-case.is-compact{ grid-template-columns:1fr; }
+  .progress-case.is-compact .progress-case-body{ padding:14px 6px 4px; }
+}
 .progress-case{ overflow:hidden; padding:14px; }
 .progress-case-media{
   position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden;
@@ -339,15 +360,15 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .progress-case-body p{ margin:0; color:var(--muted); font-size:0.92rem; line-height:1.55; }
 
 /* ---------- funds raised (all-time milestones) ---------- */
-.raised-panel{ padding:clamp(32px,5vw,56px) clamp(16px,4vw,48px); text-align:center; }
-.raised-panel h2{ margin:0; font-size:clamp(1.4rem,3vw,1.8rem); font-weight:700; letter-spacing:-0.01em; }
+.raised-panel{ padding:clamp(24px,4vw,36px) clamp(16px,3vw,32px); text-align:center; max-width:640px; margin:0 auto; }
+.raised-panel h2{ margin:0; font-size:clamp(1.15rem,2.4vw,1.4rem); font-weight:700; letter-spacing:-0.01em; }
 .raised-num{
-  display:block; font-size:clamp(2.8rem,7vw,4.2rem); font-weight:800; color:var(--ink); letter-spacing:-0.03em;
-  margin:8px 0 26px; font-variant-numeric:tabular-nums;
+  display:block; font-size:clamp(2.2rem,5vw,3rem); font-weight:800; color:var(--ink); letter-spacing:-0.03em;
+  margin:4px 0 18px; font-variant-numeric:tabular-nums;
 }
 /* one segment per $500 smile; the trailing ghost segment fades out to say "and counting" */
 .milestones{
-  list-style:none; padding:0; margin:0 auto 24px; max-width:600px;
+  list-style:none; padding:0; margin:0 auto 18px; max-width:520px;
   display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:8px;
   -webkit-mask-image:linear-gradient(90deg, #000 82%, transparent);
           mask-image:linear-gradient(90deg, #000 82%, transparent);
@@ -374,7 +395,7 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .milestones.is-in .is-current .ms-icon{ border-color:var(--accent-line); color:var(--accent); }
 .milestones.is-in .is-current .ms-label{ color:var(--accent); }
 .milestone.is-ghost{ opacity:0.5; }
-.raised-sub{ margin:0 auto; color:var(--muted); font-size:0.95rem; max-width:440px; line-height:1.55; }
+.raised-sub{ margin:0 auto; color:var(--muted); font-size:0.9rem; max-width:420px; line-height:1.55; }
 .raised-sub strong{ color:var(--ink); }
 
 /* ---------- smile builder (sponsor a smile) ---------- */
@@ -402,35 +423,49 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
 .smile-builder.has-interacted .sb-hint{ opacity:0; }
 
 .sb-tooth{ cursor:pointer; outline:none; }
+.sb-gum, .sb-fx{ pointer-events:none; }
 .t-body{ transition:transform 200ms var(--ease-out); }
 .js-ready .smile-builder .t-body{
-  opacity:0; transform:translateY(-12px);
-  transition:opacity 420ms var(--ease-out), transform 520ms var(--ease-out);
-  transition-delay:calc(var(--i) * 45ms + 200ms);
+  opacity:0; transform:translateY(-14px);
+  transition:opacity 420ms var(--ease-out), transform 560ms var(--ease-out);
+  transition-delay:calc(var(--i) * 55ms + 200ms);
 }
 .js-ready .smile-builder.is-in .t-body{ opacity:1; transform:none; }
 .js-ready .smile-builder.is-settled .t-body{ transition:transform 200ms var(--ease-out); transition-delay:0ms; }
 
-.t-damaged{ fill:url(#sbDecay); stroke:#2A1F12; stroke-width:1; stroke-linejoin:round; transition:opacity 240ms ease; }
-.t-marks{ transition:opacity 200ms ease; }
-.t-healthy{
-  fill:url(#sbEnamel); stroke:rgba(20,16,8,0.18); stroke-width:1;
-  opacity:0; transform:scaleY(0.62); transform-box:fill-box; transform-origin:50% 0%;
-  transition:opacity 260ms var(--ease-out), transform 460ms var(--ease-out);
-}
-.t-shine{ fill:#fff; opacity:0; transition:opacity 300ms ease 200ms; pointer-events:none; }
-.t-focus{ fill:none; stroke:var(--accent); stroke-width:2.5; opacity:0; transition:opacity 150ms ease; pointer-events:none; }
+.t-damaged{ transition:opacity 160ms ease; }
+.t-healthy{ opacity:0; transition:opacity 120ms ease; }
+.t-grow{ transform-box:fill-box; transform-origin:50% 0%; }
+.t-hit{ fill:transparent; }
+.t-focus{ fill:none; stroke:var(--accent); stroke-width:2.5; opacity:0; transition:opacity 150ms ease; }
 .sb-tooth:focus-visible .t-focus{ opacity:1; }
-.sb-tooth.is-restored .t-damaged, .sb-tooth.is-restored .t-marks{ opacity:0; }
-.sb-tooth.is-restored .t-healthy{ opacity:1; transform:none; }
-.sb-tooth.is-restored .t-shine{ opacity:0.55; }
-.t-frag{ fill:url(#sbDecay); opacity:0; transform-box:fill-box; transform-origin:center; pointer-events:none; }
-.t-spark{ fill:var(--accent-soft); opacity:0; transform-box:fill-box; transform-origin:center; pointer-events:none; }
+.sb-tooth.is-restored .t-damaged{ opacity:0; }
+.sb-tooth.is-restored .t-healthy{ opacity:1; }
 @media (hover:hover) and (pointer:fine){
-  .smile-builder.is-settled .sb-tooth:hover .t-body{ transform:translateY(3px); }
-  .sb-tooth:not(.is-restored):hover .t-healthy{ opacity:0.16; transform:none; }
+  .smile-builder.is-settled .sb-tooth:hover .t-body{ transform:translateY(2px); }
+  .sb-tooth:not(.is-restored):hover .t-healthy{ opacity:0.2; }
 }
-.sb-tooth:active .t-body{ transform:translateY(2px) scale(0.98); }
+.sb-tooth:active .t-body{ transform:translateY(2px); }
+
+/* comic pop effects */
+.sb-burst{ fill:var(--accent); stroke:#1A1505; stroke-width:1.5; stroke-linejoin:round; transform-box:fill-box; transform-origin:center; opacity:0; }
+.sb-action{ stroke:var(--accent-soft); stroke-width:2.4; stroke-linecap:round; opacity:0; }
+.sb-crumb{ fill:url(#sbDecay); stroke:#24170A; stroke-width:0.8; transform-box:fill-box; transform-origin:center; }
+.sb-pop{
+  position:absolute; top:14px; right:16px; z-index:2;
+  padding:8px 16px; border-radius:999px; font-weight:800; font-size:0.95rem; letter-spacing:-0.01em;
+  background:var(--accent); color:var(--accent-ink); border:2px solid #1A1505;
+  box-shadow:3px 3px 0 #1A1505;
+  opacity:0; transform:scale(0.6) rotate(-8deg); pointer-events:none;
+  transition:opacity 160ms ease, transform 160ms var(--ease-out);
+}
+.sb-pop.is-on{ opacity:1; transform:rotate(-4deg); animation:comicPop 520ms cubic-bezier(0.2, 0.8, 0.25, 1); }
+@keyframes comicPop{
+  0%{ transform:scale(0.6) rotate(-10deg); }
+  55%{ transform:scale(1.12) rotate(-2deg); }
+  80%{ transform:scale(0.97) rotate(-5deg); }
+  100%{ transform:rotate(-4deg); }
+}
 
 .sb-panel{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:16px 28px; align-items:center; }
 .sb-panel > .btn{ grid-column:2; }
@@ -462,6 +497,7 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
   background:var(--accent-tint); color:var(--accent); border:1px solid var(--accent-line); font-size:1.35rem;
 }
 .give-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; }
+.give-grid.is-pair{ max-width:820px; margin:0 auto; }
 .give-card{
   padding:26px 24px; position:relative; display:flex; flex-direction:column; gap:12px;
   transition:transform 220ms var(--ease-out), border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
@@ -657,7 +693,9 @@ html:not(.js-ready) .hero-smile path{ stroke-dashoffset:0; }
   .ba-caption p.is-swapping{ filter:none; }
   .ms-fill, .ms-icon, .ms-label{ transition-duration:200ms; transition-delay:0ms; }
   .js-ready .smile-builder .t-body{ transform:none; transition:opacity 200ms ease; transition-delay:0ms; }
-  .t-healthy{ transform:none; transition:opacity 200ms ease; }
+  .t-healthy, .t-damaged{ transition:opacity 200ms ease; }
+  .sb-pop.is-on{ animation:none; }
+  .glass-bubble, .fb-wrap{ animation:none !important; }
   .about-face, .about-back, .about-flip.is-flipped .about-front{ transform:none; }
   .about-face{ transition:opacity 200ms ease; }
   .give-card, .shop-card, .btn, .chip{ transition-property:background-color, border-color, box-shadow, color; }

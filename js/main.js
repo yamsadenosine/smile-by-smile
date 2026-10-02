@@ -274,30 +274,37 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
 
 /* =========================================================
    Smile builder: an upper smile of ten decayed teeth.
-   Tap a tooth to restore it ($50 each, $500 for a full smile).
+   Tap a tooth and a healthy one grows out of the gum
+   ($50 each, $500 for a full smile).
+   Drawing notes: teeth use frontal-view proportions (visible
+   widths shrink toward the back of the arch), the gum is drawn
+   OVER the teeth so restored teeth can emerge from under it.
    ========================================================= */
 (function initSmileBuilder() {
   const root = document.querySelector('[data-smile-builder]');
   if (!root) return;
   const svg = root.querySelector('[data-sb-svg]');
+  const popEl = root.querySelector('[data-sb-pop]');
   const NS = 'http://www.w3.org/2000/svg';
   const COST = 50;
-  const GAP = 3;
-  const W = 600;
+  const CX = 300;
+  const f = (n) => (Math.round(n * 10) / 10).toString();
 
-  // Viewer's left to right (the patient's right side first).
-  const TEETH = [
-    ['upper right second premolar', 'premolar', 34, 58],
-    ['upper right first premolar', 'premolar', 38, 64],
-    ['upper right canine', 'canine', 44, 80],
-    ['upper right lateral incisor', 'incisor', 42, 74],
-    ['upper right central incisor', 'incisor', 54, 90],
-    ['upper left central incisor', 'incisor', 54, 90],
-    ['upper left lateral incisor', 'incisor', 42, 74],
-    ['upper left canine', 'canine', 44, 80],
-    ['upper left first premolar', 'premolar', 38, 64],
-    ['upper left second premolar', 'premolar', 34, 58],
+  // [name, outline, visible width, crown height, crown top y, damage]
+  // keep: how much of the crown survives (0-1); lesion: [x, y, size] as fractions of the tooth
+  const SPEC = [
+    ['upper right second premolar', 'premolar', 30, 54, 64, { keep: 0.2 }],
+    ['upper right first premolar', 'premolar', 35, 60, 70, { keep: 0.74, lesion: [0.05, 0.52, 0.5] }],
+    ['upper right canine', 'canine', 42, 76, 76, { keep: 0.88, cervical: true, lesion: [-0.25, 0.62, 0.32] }],
+    ['upper right lateral incisor', 'lateral', 48, 66, 82, { keep: 0.36 }],
+    ['upper right central incisor', 'central', 62, 80, 78, { keep: 0.64, lesion: [0.3, 0.42, 0.42] }],
+    ['upper left central incisor', 'central', 62, 80, 78, { keep: 0.95, cervical: true, lesion: [0.12, 0.55, 0.5] }],
+    ['upper left lateral incisor', 'lateral', 48, 66, 82, { keep: 0.6, lesion: [0.28, 0.4, 0.4] }],
+    ['upper left canine', 'canine', 42, 76, 76, { keep: 0.76 }],
+    ['upper left first premolar', 'premolar', 35, 60, 70, { keep: 0.84, cervical: true }],
+    ['upper left second premolar', 'premolar', 30, 54, 64, { keep: 0.5, lesion: [0, 0.35, 0.45] }],
   ];
+  const TILT = [0, 1.5, 3, 4.5, 6];
 
   function el(tag, attrs = {}, parent) {
     const node = document.createElementNS(NS, tag);
@@ -305,7 +312,7 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     parent?.appendChild(node);
     return node;
   }
-  // Small seeded random so every visitor sees the same "damage".
+  // Seeded random so every visitor sees the same damage.
   function seeded(seed) {
     return () => {
       seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
@@ -314,182 +321,311 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  const f = (n) => n.toFixed(1);
 
-  function healthyPath(type, w, h) {
-    const hw = w / 2, nw = w * 0.41;
-    const sides = `C ${f(hw)} ${f(h * 0.22)} ${f(hw)} ${f(h * 0.55)}`;
-    const sidesL = `C ${f(-hw)} ${f(h * 0.55)} ${f(-hw)} ${f(h * 0.22)} ${f(-nw)} 0`;
-    if (type === 'canine') {
-      return `M ${f(-nw)} 0 L ${f(nw)} 0 ${sides} ${f(hw * 0.93)} ${f(h * 0.74)} Q ${f(hw * 0.5)} ${f(h * 0.9)} 0 ${f(h)} Q ${f(-hw * 0.5)} ${f(h * 0.9)} ${f(-hw * 0.93)} ${f(h * 0.74)} ${sidesL} Z`;
+  // Crown outlines, drawn with the mesial side (toward the midline) at +x, then mirrored per side.
+  const OUTLINES = {
+    central: [[-.36, 0], 'L', [.36, 0], 'C', [.44, .25], [.5, .55], [.5, .78], 'C', [.5, .9], [.45, .99], [.36, 1],
+      'C', [.15, 1.012], [-.15, 1], [-.3, .985], 'C', [-.44, .97], [-.5, .88], [-.5, .74], 'C', [-.5, .5], [-.44, .22], [-.36, 0]],
+    lateral: [[-.36, 0], 'L', [.36, 0], 'C', [.45, .25], [.5, .5], [.49, .72], 'C', [.48, .9], [.4, 1], [.25, 1],
+      'C', [.05, 1.01], [-.2, .99], [-.34, .94], 'C', [-.46, .88], [-.5, .78], [-.5, .64], 'C', [-.5, .42], [-.44, .2], [-.36, 0]],
+    canine: [[-.36, 0], 'L', [.36, 0], 'C', [.46, .22], [.52, .45], [.5, .62], 'C', [.46, .76], [.22, .9], [.04, 1],
+      'C', [-.18, .93], [-.4, .84], [-.48, .72], 'C', [-.53, .52], [-.46, .22], [-.36, 0]],
+    premolar: [[-.36, 0], 'L', [.36, 0], 'C', [.46, .2], [.52, .45], [.48, .66], 'C', [.42, .82], [.2, .95], [0, 1],
+      'C', [-.2, .95], [-.42, .82], [-.48, .66], 'C', [-.52, .45], [-.46, .2], [-.36, 0]],
+  };
+  function outlinePath(type, w, h, m) {
+    let d = '';
+    let first = true;
+    for (const part of OUTLINES[type]) {
+      if (typeof part === 'string') { d += ` ${part}`; continue; }
+      d += `${first ? 'M' : ''} ${f(part[0] * w * m)} ${f(part[1] * h)}`;
+      first = false;
     }
-    if (type === 'premolar') {
-      return `M ${f(-nw)} 0 L ${f(nw)} 0 ${sides} ${f(hw * 0.95)} ${f(h * 0.72)} Q ${f(hw * 0.75)} ${f(h)} 0 ${f(h)} Q ${f(-hw * 0.75)} ${f(h)} ${f(-hw * 0.95)} ${f(h * 0.72)} ${sidesL} Z`;
-    }
-    return `M ${f(-nw)} 0 L ${f(nw)} 0 ${sides} ${f(hw * 0.98)} ${f(h - 9)} Q ${f(hw * 0.94)} ${f(h)} ${f(hw * 0.66)} ${f(h)} L ${f(-hw * 0.66)} ${f(h)} Q ${f(-hw * 0.94)} ${f(h)} ${f(-hw * 0.98)} ${f(h - 9)} ${sidesL} Z`;
+    return d + ' Z';
   }
 
-  // Same tooth, snapped off at a jagged line partway down.
-  function damagedTooth(w, h, rnd) {
-    const hw = w / 2, nw = w * 0.41;
-    const yL = h * (0.55 + rnd() * 0.28);
-    const yR = h * (0.55 + rnd() * 0.28);
-    const points = [];
-    const steps = 5;
-    const notch = 1 + Math.floor(rnd() * 3);
-    for (let k = 1; k < steps; k++) {
-      const t = k / steps;
-      const x = hw * 0.95 - t * hw * 1.9;
-      let y = yR + (yL - yR) * t + (rnd() - 0.5) * 20;
-      if (k === notch) y -= 10 + rnd() * 8;
-      points.push([x, Math.max(h * 0.25, y)]);
+  // Lay teeth side by side so they touch at their contact points.
+  const totalW = SPEC.reduce((s, t) => s + t[2], 0);
+  let cursor = CX - totalW / 2;
+  const layout = SPEC.map(([name, type, w, h, top, damage], i) => {
+    const cx = cursor + w / 2;
+    cursor += w;
+    const left = i < SPEC.length / 2;
+    const depth = left ? 4 - i : i - 5;
+    const rot = (left ? 1 : -1) * TILT[depth];
+    return { name, type, w, h, top, damage, i, cx, depth, m: left ? 1 : -1, rot };
+  });
+  const toWorld = (t, x, y) => {
+    const a = t.rot * Math.PI / 180;
+    return { x: t.cx + x * Math.cos(a) - y * Math.sin(a), y: t.top + x * Math.sin(a) + y * Math.cos(a) };
+  };
+
+  /* ---------- shared paint ---------- */
+  const defs = el('defs', {}, svg);
+  function linear(id, stops, horizontal = false) {
+    const g = el('linearGradient', { id, x1: 0, y1: 0, x2: horizontal ? 1 : 0, y2: horizontal ? 0 : 1 }, defs);
+    stops.forEach(([o, c, a = 1]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, g));
+  }
+  function radial(id, stops) {
+    const g = el('radialGradient', { id }, defs);
+    stops.forEach(([o, c, a = 1]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, g));
+  }
+  // Enamel: warm at the neck, bright in the body, slightly translucent blue-grey at the biting edge.
+  linear('sbEnamel', [['0', '#E6D7BC'], ['0.2', '#F2E9D8'], ['0.5', '#FBF8F1'], ['0.8', '#F3F2EC'], ['0.94', '#D9E0E4'], ['1', '#BCC7CF']]);
+  // Rounded crowns: darker toward both sides.
+  linear('sbSides', [['0', '#5A4630', 0.42], ['0.2', '#5A4630', 0], ['0.8', '#5A4630', 0], ['1', '#5A4630', 0.42]], true);
+  radial('sbGloss', [['0', '#FFFFFF', 0.85], ['1', '#FFFFFF', 0]]);
+  linear('sbDecay', [['0', '#8C7140'], ['0.35', '#B49A63'], ['0.75', '#A08550'], ['1', '#6E5428']]);
+  radial('sbStain', [['0', '#4A3216', 0.75], ['1', '#4A3216', 0]]);
+  radial('sbCaries', [['0', '#0B0703'], ['0.6', '#22160A'], ['1', '#4A3418', 0]]);
+  linear('sbGum', [['0', '#9E3F52'], ['0.55', '#C9616F'], ['0.85', '#DE8590'], ['1', '#E99AA2']]);
+
+  const fxBack = el('g', { class: 'sb-fx' }, svg);
+  const teethLayer = el('g', {}, svg);
+
+  /* ---------- teeth ---------- */
+  const teeth = layout.map((t) => {
+    const rnd = seeded(t.i * 7919 + 17);
+    const { w, h, m } = t;
+    const outline = outlinePath(t.type, w, h, m);
+
+    el('path', { d: outline }, el('clipPath', { id: `sbTooth${t.i}` }, defs));
+    el('rect', { x: f(-w), y: 0, width: f(w * 2), height: f(h * 2) }, el('clipPath', { id: `sbGrow${t.i}` }, defs));
+
+    // Jagged fracture line: what's left of the crown sits above it.
+    const keepY = t.damage.keep * h;
+    const jag = [];
+    const steps = 7;
+    for (let k = 0; k <= steps; k++) {
+      const x = -w * 0.55 + (k / steps) * w * 1.1;
+      let y = keepY + (rnd() - 0.5) * h * 0.14;
+      if (k === 2 + Math.floor(rnd() * 3)) y -= h * 0.08;
+      jag.push([x, Math.max(h * 0.08, Math.min(h * 1.05, y))]);
     }
-    const d = `M ${f(-nw)} 0 L ${f(nw)} 0 C ${f(hw)} ${f(h * 0.2)} ${f(hw)} ${f(yR * 0.6)} ${f(hw * 0.97)} ${f(yR)} `
-      + points.map(([x, y]) => `L ${f(x)} ${f(y)}`).join(' ')
-      + ` L ${f(-hw * 0.97)} ${f(yL)} C ${f(-hw)} ${f(yL * 0.6)} ${f(-hw)} ${f(h * 0.2)} ${f(-nw)} 0 Z`;
-    return { d, points, edge: Math.min(yL, yR) };
-  }
+    el('polygon', {
+      points: [[-w, -h], [w, -h], [w, jag[steps][1]], ...jag.slice().reverse(), [-w, jag[0][1]]].map(([x, y]) => `${f(x)},${f(y)}`).join(' '),
+    }, el('clipPath', { id: `sbBreak${t.i}` }, defs));
 
-  function buildDefs() {
-    const defs = el('defs', {}, svg);
-    const grad = (id, stops) => {
-      const g = el('linearGradient', { id, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-      stops.forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, g));
-    };
-    grad('sbDecay', [['0', '#A99263'], ['0.45', '#7D663B'], ['1', '#4A381D']]);
-    grad('sbEnamel', [['0', '#FFFFFF'], ['0.55', '#F5F1E9'], ['1', '#E2DBCB']]);
-    grad('sbGum', [['0', '#DC8A95'], ['0.7', '#B65B6A'], ['1', '#9C4655']]);
-  }
-
-  const layout = (() => {
-    const total = TEETH.reduce((sum, t) => sum + t[2], 0) + GAP * (TEETH.length - 1);
-    let x = (W - total) / 2;
-    return TEETH.map(([name, type, w, h], i) => {
-      const cx = x + w / 2;
-      x += w + GAP;
-      const d = (cx - W / 2) / (W / 2);
-      return { name, type, w, h, i, cx, top: 92 - 66 * d * d, rot: -d * 13, nw: w * 0.41 };
-    });
-  })();
-
-  function buildGum() {
-    const L = layout[0], R = layout[layout.length - 1];
-    const start = { x: L.cx - L.w / 2 - 4, y: L.top + 12 };
-    const end = { x: R.cx + R.w / 2 + 4, y: R.top + 12 };
-    let d = `M ${f(start.x)} ${f(start.y)} C ${f(start.x - 6)} ${f(start.y - 40)} ${W / 2 - 150} 34 ${W / 2} 34 C ${W / 2 + 150} 34 ${f(end.x + 6)} ${f(end.y - 40)} ${f(end.x)} ${f(end.y)} Q ${f(end.x - 2)} ${f(R.top + 12)} ${f(R.cx + R.w / 2)} ${f(R.top + 12)}`;
-    // Lower edge runs just under the tooth tops; the teeth cover it and the gaps show gum.
-    for (let k = layout.length - 1; k >= 0; k--) {
-      const t = layout[k];
-      d += ` L ${f(t.cx + t.w / 2)} ${f(t.top + 12)} L ${f(t.cx - t.w / 2)} ${f(t.top + 12)}`;
-    }
-    d += ` Q ${f(start.x + 2)} ${f(L.top + 10)} ${f(start.x)} ${f(start.y)} Z`;
-    el('path', { d, fill: 'url(#sbGum)' }, svg);
-    // soft highlight along the gum so it reads as glossy, not flat
-    el('path', { d: `M ${f(start.x + 40)} ${f(start.y - 30)} Q ${W / 2} 30 ${f(end.x - 40)} ${f(end.y - 30)}`, fill: 'none', stroke: 'rgba(255,255,255,0.22)', 'stroke-width': 3, 'stroke-linecap': 'round' }, svg);
-  }
-
-  const teeth = [];
-  function buildTooth(t) {
-    const rnd = seeded(t.i * 7919 + 13);
     const g = el('g', {
-      class: 'sb-tooth',
-      transform: `translate(${f(t.cx)} ${f(t.top)}) rotate(${f(t.rot)})`,
+      class: 'sb-tooth', transform: `translate(${f(t.cx)} ${f(t.top)}) rotate(${f(t.rot)})`,
       tabindex: 0, role: 'button', 'aria-pressed': 'false',
-    }, svg);
+    }, teethLayer);
     g.style.setProperty('--i', Math.round(Math.abs(t.i - 4.5)));
     const body = el('g', { class: 't-body' }, g);
+    const dim = [0, 0.04, 0.1, 0.17, 0.24][t.depth];
 
-    const healthy = healthyPath(t.type, t.w, t.h);
-    const broken = damagedTooth(t.w, t.h, rnd);
-    el('path', { class: 't-damaged', d: broken.d }, body);
+    // Decayed crown
+    const damaged = el('g', { class: 't-damaged', 'clip-path': `url(#sbBreak${t.i})` }, body);
+    const dInner = el('g', { 'clip-path': `url(#sbTooth${t.i})` }, damaged);
+    el('path', { d: outline, fill: 'url(#sbDecay)' }, dInner);
+    el('rect', { x: f(-w / 2), y: 0, width: f(w), height: f(h), fill: 'url(#sbSides)' }, dInner);
+    for (let k = 0; k < 3; k++) {
+      el('ellipse', {
+        cx: f((rnd() - 0.5) * w * 0.8), cy: f(h * (0.1 + rnd() * 0.6)),
+        rx: f(w * (0.18 + rnd() * 0.2)), ry: f(h * (0.1 + rnd() * 0.12)), fill: 'url(#sbStain)',
+      }, dInner);
+    }
+    if (t.damage.cervical) {
+      el('path', {
+        d: `M ${f(-w * 0.6)} ${f(h * 0.12)} Q 0 ${f(h * 0.3)} ${f(w * 0.6)} ${f(h * 0.12)} L ${f(w * 0.6)} ${f(h * 0.2)} Q 0 ${f(h * 0.4)} ${f(-w * 0.6)} ${f(h * 0.2)} Z`,
+        fill: '#2B1C0C', opacity: 0.75,
+      }, dInner);
+    }
+    if (t.damage.lesion) {
+      const [lx, ly, ls] = t.damage.lesion;
+      const r = ls * w * 0.42;
+      const pts = Array.from({ length: 11 }, (_, k) => {
+        const a = (k / 11) * Math.PI * 2;
+        const rr = r * (0.45 + rnd() * 0.7);
+        return `${f(lx * w * m + Math.cos(a) * rr * 0.8)},${f(ly * h + Math.sin(a) * rr * 1.25)}`;
+      }).join(' ');
+      el('polygon', { points: pts, fill: 'url(#sbCaries)' }, dInner);
+    }
+    // Fracture edge: dark break line with a lighter chipped dentin line just above it.
+    const jagD = jag.map(([x, y], k) => `${k ? 'L' : 'M'} ${f(x)} ${f(y)}`).join(' ');
+    el('path', { d: jagD, fill: 'none', stroke: '#D8C79F', 'stroke-width': 2.2, transform: 'translate(0 -2.2)', opacity: 0.7 }, dInner);
+    el('path', { d: jagD, fill: 'none', stroke: '#24170A', 'stroke-width': 2.4 }, dInner);
+    if (dim) el('rect', { x: f(-w), y: 0, width: f(w * 2), height: f(h * 1.2), fill: '#0A0C10', opacity: dim }, dInner);
+    el('path', { d: outline, fill: 'none', stroke: 'rgba(40,26,10,0.6)', 'stroke-width': 1.2 }, damaged);
 
-    const marks = el('g', { class: 't-marks' }, body);
-    // Decay eating in from the broken edge: an irregular dark blob that touches the edge.
-    const [hx, hy] = broken.points[Math.floor(rnd() * broken.points.length)];
-    const r = 5 + rnd() * 4;
-    const blob = Array.from({ length: 8 }, (_, k) => {
-      const a = (k / 8) * Math.PI * 2;
-      const rr = r * (0.7 + rnd() * 0.5);
-      return `${f(hx * 0.85 + Math.cos(a) * rr * 1.3)},${f(hy - 2 + Math.sin(a) * rr)}`;
-    }).join(' ');
-    el('polygon', { points: blob, fill: '#1B1209' }, marks);
-    // brown staining along the gum line
-    el('path', {
-      d: `M ${f(-t.nw)} 1 L ${f(t.nw)} 1 L ${f(t.w * 0.46)} ${f(t.h * 0.16)} Q 0 ${f(t.h * 0.24)} ${f(-t.w * 0.46)} ${f(t.h * 0.16)} Z`,
-      fill: '#3B2A14', opacity: 0.55,
-    }, marks);
-    const cx0 = f((rnd() - 0.5) * t.w * 0.4);
-    el('path', {
-      d: `M ${cx0} ${f(broken.edge)} Q ${f(+cx0 + 4)} ${f(broken.edge * 0.6)} ${f(+cx0 - 2)} ${f(broken.edge * 0.28)}`,
-      fill: 'none', stroke: '#24180C', 'stroke-width': 1.2, 'stroke-linecap': 'round',
-    }, marks);
+    // Healthy crown (hidden until restored). Clipped at the crown top so it emerges from under the gum.
+    const healthy = el('g', { class: 't-healthy', 'clip-path': `url(#sbGrow${t.i})` }, body);
+    const grow = el('g', { class: 't-grow' }, healthy);
+    const hInner = el('g', { 'clip-path': `url(#sbTooth${t.i})` }, grow);
+    el('path', { d: outline, fill: 'url(#sbEnamel)' }, hInner);
+    el('rect', { x: f(-w / 2), y: 0, width: f(w), height: f(h), fill: 'url(#sbSides)' }, hInner);
+    // soft vertical reflection, slightly toward the midline
+    el('ellipse', { cx: f(w * 0.1 * m), cy: f(h * 0.45), rx: f(w * 0.13), ry: f(h * 0.3), fill: 'url(#sbGloss)' }, hInner);
+    el('ellipse', { cx: f(-w * 0.2 * m), cy: f(h * 0.5), rx: f(w * 0.05), ry: f(h * 0.22), fill: 'url(#sbGloss)', opacity: 0.5 }, hInner);
+    if (dim) el('rect', { x: f(-w), y: 0, width: f(w * 2), height: f(h * 1.2), fill: '#0A0C10', opacity: dim }, hInner);
+    el('path', { d: outline, fill: 'none', stroke: 'rgba(70,52,30,0.32)', 'stroke-width': 1 }, grow);
 
-    el('path', { class: 't-healthy', d: healthy }, body);
-    const hw = t.w / 2;
-    el('path', {
-      class: 't-shine',
-      d: `M ${f(-hw * 0.48)} ${f(t.h * 0.12)} Q ${f(-hw * 0.66)} ${f(t.h * 0.45)} ${f(-hw * 0.42)} ${f(t.h * 0.76)} Q ${f(-hw * 0.32)} ${f(t.h * 0.45)} ${f(-hw * 0.48)} ${f(t.h * 0.12)} Z`,
-    }, body);
-    el('path', { class: 't-focus', d: healthy, transform: 'translate(0 0) scale(1.08)' }, body);
+    el('rect', { class: 't-hit', x: f(-w / 2), y: 0, width: f(w), height: f(h) }, body);
+    el('path', { class: 't-focus', d: outline }, body);
 
-    // Crumbs that fall away when the tooth is restored.
-    const frags = broken.points.slice(0, 3).map(([x, y]) => {
-      const s = 3 + rnd() * 3;
-      return el('polygon', {
-        class: 't-frag',
-        points: `${f(x - s)},${f(y - s * 0.4)} ${f(x + s)},${f(y - s)} ${f(x + s * 0.6)},${f(y + s)} ${f(x - s * 0.7)},${f(y + s * 0.7)}`,
-      }, g);
-    });
-    const sparkWrap = el('g', { transform: `translate(${f(hw * 0.35)} ${f(t.h * 0.3)})` }, g);
-    const spark = el('path', { class: 't-spark', d: 'M0,-9 L2.2,-2.2 L9,0 L2.2,2.2 L0,9 L-2.2,2.2 L-9,0 L-2.2,-2.2 Z' }, sparkWrap);
-
-    const tooth = { ...t, g, frags, spark, restored: false };
-    teeth.push(tooth);
+    const tooth = { ...t, g, damaged, grow, jag, restored: false };
     g.addEventListener('click', () => toggle(tooth));
     g.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(tooth); }
     });
+    g.setAttribute('aria-label', `${t.name}, decayed. Restore for $${COST}.`);
     return tooth;
-  }
+  });
 
-  buildDefs();
-  buildGum();
-  layout.forEach(buildTooth);
+  /* ---------- gum (drawn over the teeth) ---------- */
+  (function buildGum() {
+    // Gum margin: arcs up over each tooth, dips into a papilla point between teeth.
+    const contact = (t, side, yFrac) => toWorld(t, side * t.w * 0.47, t.h * yFrac);
+    const papillae = [];
+    for (let k = 0; k < layout.length - 1; k++) {
+      const a = contact(layout[k], 1, 0.3), b = contact(layout[k + 1], -1, 0.3);
+      papillae.push({ x: (a.x + b.x) / 2, y: Math.max(a.y, b.y) + 2 });
+    }
+    const L = layout[0], R = layout[layout.length - 1];
+    const startPt = contact(L, -1, 0.26);
+    const endPt = contact(R, 1, 0.26);
+    const pts = [startPt, ...papillae, endPt];
+    let margin = `M ${f(pts[0].x - 6)} ${f(pts[0].y)} L ${f(pts[0].x)} ${f(pts[0].y)}`;
+    layout.forEach((t, k) => {
+      const A = pts[k], B = pts[k + 1];
+      const Z = toWorld(t, -t.w * 0.06 * t.m, t.h * 0.13); // zenith sits a touch distal of center
+      const yc = (8 * Z.y - A.y - B.y) / 6;
+      margin += ` C ${f(A.x + (Z.x - A.x) * 0.45)} ${f(yc)} ${f(B.x - (B.x - Z.x) * 0.45)} ${f(yc)} ${f(B.x)} ${f(B.y)}`;
+    });
+    const last = pts[pts.length - 1];
+    margin += ` L ${f(last.x + 6)} ${f(last.y)}`;
+
+    const topY = Math.min(...pts.map(p => p.y)) - 42;
+    const gum = `${margin} C ${f(last.x + 16)} ${f(last.y - 18)} ${CX + 150} ${topY} ${CX} ${topY} C ${CX - 150} ${topY} ${f(pts[0].x - 22)} ${f(pts[0].y - 18)} ${f(pts[0].x - 6)} ${f(pts[0].y)} Z`;
+
+    const gumLayer = el('g', { class: 'sb-gum' }, svg);
+    // soft shadow the gum casts onto the teeth
+    el('path', { d: margin, fill: 'none', stroke: 'rgba(40,18,14,0.35)', 'stroke-width': 7, 'stroke-linejoin': 'round' }, gumLayer);
+    el('path', { d: gum, fill: 'url(#sbGum)' }, gumLayer);
+    // wet highlight along the margin and across the arch
+    el('path', { d: margin, fill: 'none', stroke: 'rgba(255,214,218,0.45)', 'stroke-width': 1.4, transform: 'translate(0 -2)' }, gumLayer);
+    el('path', {
+      d: `M ${f(pts[0].x + 34)} ${f(pts[0].y - 22)} C ${CX - 120} ${topY + 10} ${CX + 120} ${topY + 10} ${f(last.x - 34)} ${f(last.y - 22)}`,
+      fill: 'none', stroke: 'rgba(255,255,255,0.18)', 'stroke-width': 3, 'stroke-linecap': 'round',
+    }, gumLayer);
+  })();
+
+  const fxFront = el('g', { class: 'sb-fx' }, svg);
+
   // Frame the drawing tightly (with room below for falling crumbs).
   try {
     const bb = svg.getBBox();
-    svg.setAttribute('viewBox', `${f(bb.x - 6)} ${f(bb.y - 6)} ${f(bb.width + 12)} ${f(bb.height + 30)}`);
-  } catch (_) { svg.setAttribute('viewBox', '40 0 520 210'); }
+    svg.setAttribute('viewBox', `${f(bb.x - 10)} ${f(bb.y - 4)} ${f(bb.width + 20)} ${f(bb.height + 26)}`);
+  } catch (_) { svg.setAttribute('viewBox', '120 0 360 190'); }
 
+  /* ---------- comic effects ---------- */
+  function starburst(t) {
+    const c = toWorld(t, 0, t.h * 0.62);
+    const spikes = 12;
+    const r1 = t.w * 0.62, r2 = t.w * 1.02;
+    const pts = Array.from({ length: spikes * 2 }, (_, k) => {
+      const a = (k / (spikes * 2)) * Math.PI * 2;
+      const r = k % 2 ? r1 : r2;
+      return `${f(c.x + Math.cos(a) * r)},${f(c.y + Math.sin(a) * r)}`;
+    }).join(' ');
+    const burst = el('polygon', { class: 'sb-burst', points: pts }, fxBack);
+    burst.animate([
+      { opacity: 0, transform: 'scale(0.3) rotate(-8deg)' },
+      { opacity: 1, transform: 'scale(1.08) rotate(4deg)', offset: 0.35 },
+      { opacity: 0, transform: 'scale(1.22) rotate(10deg)' },
+    ], { duration: 620, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }).onfinish = () => burst.remove();
+
+    const lines = el('g', {}, fxFront);
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2 + 0.2;
+      const r = t.w * 0.75;
+      const line = el('line', {
+        class: 'sb-action',
+        x1: f(c.x + Math.cos(a) * r), y1: f(c.y + Math.sin(a) * r),
+        x2: f(c.x + Math.cos(a) * (r + 9)), y2: f(c.y + Math.sin(a) * (r + 9)),
+      }, lines);
+      line.animate([
+        { opacity: 0, transform: 'translate(0, 0)' },
+        { opacity: 1, offset: 0.3 },
+        { opacity: 0, transform: `translate(${f(Math.cos(a) * 10)}px, ${f(Math.sin(a) * 10)}px)` },
+      ], { duration: 460, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+    }
+    setTimeout(() => lines.remove(), 500);
+  }
+
+  function crumble(t) {
+    const pieces = t.damage.keep < 0.3 ? 2 : 4;
+    for (let k = 0; k < pieces; k++) {
+      const [lx, ly] = t.jag[1 + Math.floor((k / pieces) * (t.jag.length - 2))];
+      const p = toWorld(t, lx, ly);
+      const s = 2.5 + Math.random() * 3;
+      const frag = el('polygon', {
+        class: 'sb-crumb',
+        points: `${f(p.x - s)},${f(p.y - s * 0.5)} ${f(p.x + s)},${f(p.y - s)} ${f(p.x + s * 0.7)},${f(p.y + s)} ${f(p.x - s * 0.6)},${f(p.y + s * 0.8)}`,
+      }, fxFront);
+      const dx = (Math.random() - 0.5) * 22;
+      frag.animate([
+        { opacity: 1, transform: 'translate(0, 0) rotate(0deg)' },
+        { opacity: 0, transform: `translate(${f(dx)}px, ${f(36 + Math.random() * 24)}px) rotate(${f((Math.random() - 0.5) * 220)}deg)` },
+      ], { duration: 560, easing: 'cubic-bezier(0.55, 0, 1, 0.45)' }).onfinish = () => frag.remove();
+    }
+  }
+
+  /* ---------- restore / undo ---------- */
+  const reduce = () => reduceMotion() || !svg.animate;
+
+  function restore(tooth) {
+    tooth.restored = true;
+    tooth.g.setAttribute('aria-pressed', 'true');
+    tooth.g.setAttribute('aria-label', `${tooth.name}, restored. Tap to undo.`);
+    if (reduce()) { tooth.g.classList.add('is-restored'); return; }
+
+    // 1. the old tooth shudders, 2. crumbles away, 3. a new one pops out of the gum, 4. comic burst
+    tooth.damaged.animate([
+      { transform: 'translateX(0)' }, { transform: 'translateX(-1.6px)' }, { transform: 'translateX(1.6px)' },
+      { transform: 'translateX(-1px)' }, { transform: 'translateX(0)' },
+    ], { duration: 150, easing: 'linear' });
+    setTimeout(() => {
+      if (!tooth.restored) return;
+      tooth.g.classList.add('is-restored');
+      crumble(tooth);
+      tooth.grow.animate([
+        { transform: 'translateY(-100%) scale(1, 1.05)' },
+        { transform: 'translateY(5%) scale(1.06, 0.9)', offset: 0.55 },
+        { transform: 'translateY(-2%) scale(0.98, 1.04)', offset: 0.78 },
+        { transform: 'translateY(0) scale(1, 1)' },
+      ], { duration: 560, easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)', fill: 'backwards' });
+      setTimeout(() => tooth.restored && starburst(tooth), 300);
+    }, 140);
+  }
+
+  function undo(tooth) {
+    tooth.restored = false;
+    tooth.g.setAttribute('aria-pressed', 'false');
+    tooth.g.setAttribute('aria-label', `${tooth.name}, decayed. Restore for $${COST}.`);
+    if (reduce()) { tooth.g.classList.remove('is-restored'); return; }
+    tooth.grow.animate([
+      { transform: 'translateY(0)' }, { transform: 'translateY(-100%)' },
+    ], { duration: 220, easing: 'cubic-bezier(0.5, 0, 0.75, 0)' }).onfinish = () => {
+      if (!tooth.restored) tooth.g.classList.remove('is-restored');
+    };
+  }
+
+  /* ---------- readout ---------- */
   const countEl = root.querySelector('[data-sb-count]');
   const amountEl = root.querySelector('[data-sb-amount]');
   const messageEl = root.querySelector('[data-sb-message]');
   const donateBtn = root.querySelector('[data-sb-donate]');
 
   function bump(node) {
-    if (reduceMotion() || !node.animate) return;
+    if (reduce()) return;
     node.parentElement.animate(
       [{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
       { duration: 260, easing: EASE_OUT }
     );
   }
 
-  function playRestore(tooth, delay = 0) {
-    if (reduceMotion() || !tooth.g.animate) return;
-    tooth.frags.forEach((frag, k) => {
-      const dx = (k - 1) * 10 + (Math.random() - 0.5) * 8;
-      frag.animate([
-        { opacity: 1, transform: 'translate(0, 0) rotate(0deg)' },
-        { opacity: 0, transform: `translate(${dx}px, ${46 + k * 10}px) rotate(${(k - 1) * 70}deg)` },
-      ], { duration: 520, delay, easing: 'cubic-bezier(0.55, 0, 1, 0.45)', fill: 'backwards' });
-    });
-    tooth.spark.animate([
-      { opacity: 0, transform: 'scale(0.4) rotate(0deg)' },
-      { opacity: 1, transform: 'scale(1.25) rotate(45deg)', offset: 0.4 },
-      { opacity: 0, transform: 'scale(0.6) rotate(90deg)' },
-    ], { duration: 620, delay: delay + 260, easing: EASE_OUT });
-  }
-
+  let wasFull = false;
   function update() {
     const count = teeth.filter(t => t.restored).length;
     const amount = count * COST;
@@ -506,25 +642,18 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     } else {
       messageEl.innerHTML = '<strong>Full smile restored.</strong> $500 funds one patient\'s complete reconstruction.';
     }
-  }
-
-  function setRestored(tooth, restored, delay = 0) {
-    if (tooth.restored === restored) return;
-    tooth.restored = restored;
-    const apply = () => {
-      tooth.g.classList.toggle('is-restored', restored);
-      tooth.g.setAttribute('aria-pressed', String(restored));
-      tooth.g.setAttribute('aria-label', restored
-        ? `${tooth.name}, restored. Tap to undo.`
-        : `${tooth.name}, decayed. Restore for $${COST}.`);
-      if (restored) playRestore(tooth);
-    };
-    delay ? setTimeout(apply, delay) : apply();
+    const full = count === teeth.length;
+    if (full && !wasFull && popEl) {
+      setTimeout(() => popEl.classList.add('is-on'), reduce() ? 0 : 520);
+    } else if (!full && popEl) {
+      popEl.classList.remove('is-on');
+    }
+    wasFull = full;
   }
 
   function toggle(tooth) {
     root.classList.add('has-interacted');
-    setRestored(tooth, !tooth.restored);
+    tooth.restored ? undo(tooth) : restore(tooth);
     update();
   }
 
@@ -532,11 +661,17 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
   const centerOut = [...teeth].sort((a, b) => Math.abs(a.i - 4.5) - Math.abs(b.i - 4.5));
   root.querySelector('[data-sb-all]').addEventListener('click', () => {
     root.classList.add('has-interacted');
-    centerOut.filter(t => !t.restored).forEach((t, k) => setRestored(t, true, reduceMotion() ? 0 : k * 70));
+    centerOut.filter(t => !t.restored && !t.queued).forEach((t, k) => {
+      if (reduce()) { restore(t); return; }
+      t.queued = setTimeout(() => { t.queued = 0; restore(t); update(); }, k * 90);
+    });
     update();
   });
   root.querySelector('[data-sb-reset]').addEventListener('click', () => {
-    teeth.forEach(t => setRestored(t, false));
+    teeth.forEach(t => {
+      if (t.queued) { clearTimeout(t.queued); t.queued = 0; }
+      if (t.restored) undo(t);
+    });
     update();
   });
   donateBtn.addEventListener('click', () => {
@@ -544,13 +679,12 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     if (amount) handleDonate('One-Time', amount);
   });
 
-  teeth.forEach(t => t.g.setAttribute('aria-label', `${t.name}, decayed. Restore for $${COST}.`));
   update();
 
   onceInView(root, () => {
     root.classList.add('is-in');
     setTimeout(() => root.classList.add('is-settled'), 900);
-  }, { threshold: 0.25 });
+  }, { threshold: 0.2 });
 })();
 
 /* =========================================================
@@ -676,7 +810,6 @@ async function handleReferralSubmit(e) {
     _template: 'table',
     _captcha: 'false',
     'Person in need': data.personName,
-    'Relationship to referrer': data.relationship,
     'Their contact info': data.personContact || 'Not provided',
     'Situation': data.situation,
     'Submitted by': data.referrerName,

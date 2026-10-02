@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 
-<link rel="stylesheet" href="css/style.css?v=2026-10-02b">
+<link rel="stylesheet" href="css/style.css?v=2026-10-02c">
 </head>
 <body>
 
@@ -120,6 +120,8 @@
 
 <!-- ===================== 2. BEFORE / AFTER GALLERY ===================== -->
 <section id="gallery" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:150px;top:-70px;right:-30px;--bob:12s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:58px;bottom:12%;left:-18px;--bob:9s"><span class="glass-bubble"></span></span></div>
+
   <div class="section-head reveal">
     <h2>Real Patients. Real Transformations.</h2>
     <p class="section-sub">
@@ -196,6 +198,8 @@
 
 <!-- ===================== IN PROGRESS ===================== -->
 <section id="in-progress" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:44px;top:30px;left:12%;--bob:8s"><span class="glass-bubble"></span></span></div>
+
   <div class="section-head reveal">
     <h2>In Progress</h2>
     <p class="section-sub">
@@ -205,7 +209,7 @@
   </div>
 
   <div class="progress-case-grid is-single">
-    <article class="glass progress-case reveal">
+    <article class="glass progress-case is-compact reveal">
       <div class="progress-case-media">
         <img src="assets/img/inprogress-1.jpg" alt="In-progress dental case, before treatment" draggable="false" loading="lazy">
       </div>
@@ -221,6 +225,8 @@
 <!-- ===================== 3. FUNDS RAISED ===================== -->
 <!-- To update the all-time total: change data-raised below (in dollars). Everything else is computed. -->
 <section id="donate-bar" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:96px;top:0;left:3%;--bob:11s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:40px;bottom:40px;right:7%;--bob:7s"><span class="glass-bubble"></span></span></div>
+
   <div class="glass raised-panel reveal">
     <p class="eyebrow">All time</p>
     <h2>Total Raised</h2>
@@ -235,6 +241,8 @@
 
 <!-- ===================== 4. DONATION OPTIONS ===================== -->
 <section id="give" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:170px;top:32%;left:-80px;--bob:13s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:54px;top:36px;right:4%;--bob:9s"><span class="glass-bubble"></span></span></div>
+
   <div class="section-head reveal">
     <h2>Sponsor a Smile</h2>
     <p class="section-sub">Every contribution, however small or often, goes directly to a patient's reconstruction. Pick what fits your rhythm.</p>
@@ -244,6 +252,7 @@
   <div class="glass smile-builder reveal" data-smile-builder>
     <div class="sb-stage">
       <svg class="sb-arch" viewBox="0 0 600 250" role="group" aria-label="Upper smile. Tap a tooth to restore it." data-sb-svg></svg>
+      <div class="sb-pop" data-sb-pop aria-hidden="true">Full smile!</div>
       <p class="sb-hint" data-sb-hint><i class="ph ph-hand-tap" aria-hidden="true"></i> Tap a tooth to restore it</p>
     </div>
 
@@ -267,7 +276,7 @@
     </div>
   </div>
 
-  <div class="give-grid">
+  <div class="give-grid is-pair">
 
     <div class="glass give-card reveal" data-give="one-time">
       <span class="icon-tile"><i class="ph ph-hand-heart" aria-hidden="true"></i></span>
@@ -282,21 +291,8 @@
       <button class="btn btn-outline btn-block" data-donate-btn data-freq="One-Time">Give Once</button>
     </div>
 
-    <div class="glass give-card reveal give-card-featured" data-give="weekly">
+    <div class="glass give-card reveal give-card-featured" data-give="monthly">
       <span class="give-badge">Most Impact</span>
-      <span class="icon-tile"><i class="ph ph-calendar-check" aria-hidden="true"></i></span>
-      <h3>Weekly</h3>
-      <p>A steady weekly gift that adds up fast.</p>
-      <div class="give-amounts">
-        <button class="chip" data-amount="10">$10</button>
-        <button class="chip" data-amount="25">$25</button>
-        <button class="chip" data-amount="50">$50</button>
-        <button class="chip chip-custom" data-amount="custom">Other</button>
-      </div>
-      <button class="btn btn-accent btn-block" data-donate-btn data-freq="Weekly">Give Weekly</button>
-    </div>
-
-    <div class="glass give-card reveal" data-give="monthly">
       <span class="icon-tile"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i></span>
       <h3>Monthly</h3>
       <p>Become a recurring partner in restoring smiles.</p>
@@ -306,7 +302,7 @@
         <button class="chip" data-amount="100">$100</button>
         <button class="chip chip-custom" data-amount="custom">Other</button>
       </div>
-      <button class="btn btn-outline btn-block" data-donate-btn data-freq="Monthly">Give Monthly</button>
+      <button class="btn btn-accent btn-block" data-donate-btn data-freq="Monthly">Give Monthly</button>
     </div>
 
   </div>
@@ -314,6 +310,8 @@
 
 <!-- ===================== REFERRAL ===================== -->
 <section id="refer" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:120px;bottom:-50px;right:-36px;--bob:12s"><span class="glass-bubble"></span></span></div>
+
   <div class="section-head reveal">
     <h2>Refer Someone in Need</h2>
     <p class="section-sub">
@@ -337,17 +335,6 @@
         <input type="text" name="personName" required placeholder="Their full name">
       </label>
       <label class="refer-field">
-        <span>Your Relationship to Them</span>
-        <select name="relationship" required>
-          <option value="" disabled selected>Select one</option>
-          <option value="Family Member">Family Member</option>
-          <option value="Relative">Relative</option>
-          <option value="Friend">Friend</option>
-          <option value="Neighbor">Neighbor</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-      <label class="refer-field refer-field-wide">
         <span>Their Contact Info (if known)</span>
         <input type="text" name="personContact" placeholder="Phone, email, or location">
       </label>
@@ -365,6 +352,8 @@
 
 <!-- ===================== 5. MERCHANDISE ===================== -->
 <section id="shop" class="section">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:42px;top:28px;left:7%;--bob:8s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:140px;top:42%;right:-70px;--bob:14s"><span class="glass-bubble"></span></span></div>
+
   <div class="section-head reveal">
     <h2>Wear the Mission</h2>
     <p class="section-sub">One crewneck, made to carry the message. Every purchase helps fund the next smile.</p>
@@ -407,6 +396,8 @@
 
 <!-- ===================== 6. ABOUT ME (tap to flip) ===================== -->
 <section id="about" class="section about">
+  <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:110px;bottom:-30px;left:-44px;--bob:12s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:48px;top:16px;right:11%;--bob:9s"><span class="glass-bubble"></span></span></div>
+
   <div class="about-flip reveal" data-flip>
 
     <div class="glass about-panel about-face about-front" data-flip-face="front">
@@ -492,6 +483,6 @@
 <!-- ===================== TOAST (donate/buy placeholder feedback) ===================== -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/main.js?v=2026-10-02b"></script>
+<script src="js/main.js?v=2026-10-02c"></script>
 </body>
 </html>
