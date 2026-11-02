@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 
-<link rel="stylesheet" href="css/style.css?v=2026-11-01a">
+<link rel="stylesheet" href="css/style.css?v=2026-11-02a">
 </head>
 <body>
 
@@ -119,7 +119,7 @@
 </section>
 
 <!-- ===================== 2. TRANSFORMATIONS SHOWCASE ===================== -->
-<!-- To add a patient: add one <article class="sc-slide"> (copy any below) and one <button class="sc-thumb"> and bump the "5" counts in the hero stat. -->
+<!-- To add a patient: copy one <article class="dk-card"> and one <button class="dk-dot">, then bump the "5" counts (hero stat, data-completed below). -->
 <section id="showcase" class="section">
   <div class="float-bubbles" aria-hidden="true"><span class="fb-wrap" style="--d:150px;top:-70px;right:-30px;--bob:12s"><span class="glass-bubble"></span></span><span class="fb-wrap" style="--d:58px;bottom:12%;left:-18px;--bob:9s"><span class="glass-bubble"></span></span></div>
 
@@ -127,107 +127,104 @@
     <h2>Real Patients. Real Transformations.</h2>
     <p class="section-sub">
       Watch each patient go from the day they came in to the smile they have now.
-      Tap a photo to flip it, swipe for the next patient, or just let it play.
+      Tap a card to bring it forward, tap a photo to compare, or just let it play.
     </p>
   </div>
 
-  <div class="sc reveal" data-showcase role="region" aria-roledescription="carousel" aria-label="Patient transformations">
-    <div class="sc-stage">
-      <div class="sc-viewport" data-sc-viewport tabindex="0" aria-label="Patient photos. Use the left and right arrow keys to change patient.">
-        <div class="sc-track" data-sc-track>
-          <article class="sc-slide" data-sc-slide data-title="Upper arch bridge"
-                   data-before-text="Pt suffered with severe generalized dental caries with multiple missing/fractured teeth and advanced loss of tooth structure."
-                   data-after-text="Pt&#x27;s caries were removed, the remaining teeth were prepared, and a fixed bridge was fabricated to restore the upper arch."
-                   aria-roledescription="slide" aria-label="Patient 1 of 5">
-            <button type="button" class="sc-photo" data-sc-flip aria-label="Patient 1: show after treatment">
-              <img class="sc-img sc-img-before" src="assets/img/case-1-before.jpg" width="1200" height="900" alt="Patient 1 before treatment" draggable="false" fetchpriority="high">
-              <img class="sc-img sc-img-after" src="assets/img/case-1-after.jpg" width="1200" height="900" alt="Patient 1 after treatment" draggable="false" loading="lazy">
-              <span class="sc-edge" aria-hidden="true"></span>
-            </button>
-          </article>
-          <article class="sc-slide" data-sc-slide data-title="Fixed bridge and crowns"
-                   data-before-text="Severe maxillary tooth destruction with multiple missing teeth, extensive caries/fractured tooth structure, and compromised esthetics/function."
-                   data-after-text="Caries and non-restorable tooth structure were removed, and the maxillary arch was restored with a multi-unit fixed bridge/crown prosthesis to replace the missing teeth and restore the smile."
-                   aria-roledescription="slide" aria-label="Patient 2 of 5">
-            <button type="button" class="sc-photo" data-sc-flip aria-label="Patient 2: show after treatment">
-              <img class="sc-img sc-img-before" src="assets/img/case-2-before.jpg" width="1200" height="900" alt="Patient 2 before treatment" draggable="false" loading="lazy">
-              <img class="sc-img sc-img-after" src="assets/img/case-2-after.jpg" width="1200" height="900" alt="Patient 2 after treatment" draggable="false" loading="lazy">
-              <span class="sc-edge" aria-hidden="true"></span>
-            </button>
-          </article>
-          <article class="sc-slide" data-sc-slide data-title="Extractions and removable denture"
-                   data-before-text="Severe generalized dental breakdown with extensive caries, multiple missing and non-restorable teeth, and significant loss of function and esthetics."
-                   data-after-text="The hopeless teeth were extracted, the mouth was cleaned and prepared, and a removable denture was fabricated to replace the missing teeth and restore the patient&#x27;s smile, chewing ability, and overall function."
-                   aria-roledescription="slide" aria-label="Patient 3 of 5">
-            <button type="button" class="sc-photo" data-sc-flip aria-label="Patient 3: show after treatment">
-              <img class="sc-img sc-img-before" src="assets/img/case-3-before.jpg" width="1200" height="900" alt="Patient 3 before treatment" draggable="false" loading="lazy">
-              <img class="sc-img sc-img-after" src="assets/img/case-3-after.jpg" width="1200" height="900" alt="Patient 3 after treatment" draggable="false" loading="lazy">
-              <span class="sc-edge" aria-hidden="true"></span>
-            </button>
-          </article>
-          <article class="sc-slide" data-sc-slide data-title="Upper back teeth replaced"
-                   data-before-text="Pt had been missing her upper molars for years."
-                   data-after-text="Her missing upper molars were replaced, giving her back teeth again and restoring her ability to chew."
-                   aria-roledescription="slide" aria-label="Patient 4 of 5">
-            <button type="button" class="sc-photo" data-sc-flip aria-label="Patient 4: show after treatment">
-              <img class="sc-img sc-img-before" src="assets/img/case-4-before.jpg" width="1200" height="900" alt="Patient 4 before treatment" draggable="false" loading="lazy">
-              <img class="sc-img sc-img-after" src="assets/img/case-4-after.jpg" width="1200" height="900" alt="Patient 4 after treatment" draggable="false" loading="lazy">
-              <span class="sc-edge" aria-hidden="true"></span>
-            </button>
-          </article>
-          <article class="sc-slide" data-sc-slide data-title="Front bridge, teeth 6 to 11"
-                   data-before-text="Pt had decay and rot on teeth 6 through 11, the upper front teeth from canine to canine."
-                   data-after-text="A bridge was placed from tooth 6 to tooth 11, restoring her smile and giving her another chance at life."
-                   aria-roledescription="slide" aria-label="Patient 5 of 5">
-            <button type="button" class="sc-photo" data-sc-flip aria-label="Patient 5: show after treatment">
-              <img class="sc-img sc-img-before" src="assets/img/case-5-before.jpg" width="1200" height="900" alt="Patient 5 before treatment" draggable="false" loading="lazy">
-              <img class="sc-img sc-img-after" src="assets/img/case-5-after.jpg" width="1200" height="900" alt="Patient 5 after treatment" draggable="false" loading="lazy">
-              <span class="sc-edge" aria-hidden="true"></span>
-            </button>
-          </article>
-        </div>
-      </div>
-      <span class="sc-state" data-sc-state aria-hidden="true">Before</span>
-      <span class="sc-hint" aria-hidden="true"><i class="ph ph-hand-tap"></i>Tap to flip</span>
+  <div class="deck reveal" data-showcase role="region" aria-roledescription="carousel" aria-label="Patient transformations">
+    <div class="dk-stage" data-sc-stage tabindex="0" aria-label="Patient photos. Use the left and right arrow keys to change patient.">
+      <article class="dk-card" data-sc-slide data-title="Upper arch bridge"
+               data-before-text="Pt suffered with severe generalized dental caries with multiple missing/fractured teeth and advanced loss of tooth structure."
+               data-after-text="Pt&#x27;s caries were removed, the remaining teeth were prepared, and a fixed bridge was fabricated to restore the upper arch."
+               aria-roledescription="slide" aria-label="Patient 1 of 5">
+        <button type="button" class="dk-photo" data-sc-flip aria-label="Patient 1: show after treatment">
+          <img class="dk-img dk-img-before" src="assets/img/case-1-before.jpg" width="1200" height="900" alt="Patient 1 before treatment" draggable="false" fetchpriority="high">
+          <img class="dk-img dk-img-after" src="assets/img/case-1-after.jpg" width="1200" height="900" alt="Patient 1 after treatment" draggable="false" loading="lazy">
+          <span class="dk-edge" aria-hidden="true"></span>
+          <span class="dk-pill" data-sc-pill>Before</span>
+          <span class="dk-hint" aria-hidden="true"><i class="ph ph-arrows-left-right"></i>Tap to compare</span>
+        </button>
+        <div class="dk-foot"><span>Patient 1</span><span class="dk-done"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Completed</span></div>
+        <button type="button" class="dk-pick" data-sc-pick aria-label="Show patient 1: Upper arch bridge"></button>
+      </article>
+      <article class="dk-card" data-sc-slide data-title="Fixed bridge and crowns"
+               data-before-text="Severe maxillary tooth destruction with multiple missing teeth, extensive caries/fractured tooth structure, and compromised esthetics/function."
+               data-after-text="Caries and non-restorable tooth structure were removed, and the maxillary arch was restored with a multi-unit fixed bridge/crown prosthesis to replace the missing teeth and restore the smile."
+               aria-roledescription="slide" aria-label="Patient 2 of 5">
+        <button type="button" class="dk-photo" data-sc-flip aria-label="Patient 2: show after treatment">
+          <img class="dk-img dk-img-before" src="assets/img/case-2-before.jpg" width="1200" height="900" alt="Patient 2 before treatment" draggable="false">
+          <img class="dk-img dk-img-after" src="assets/img/case-2-after.jpg" width="1200" height="900" alt="Patient 2 after treatment" draggable="false" loading="lazy">
+          <span class="dk-edge" aria-hidden="true"></span>
+          <span class="dk-pill" data-sc-pill>Before</span>
+          <span class="dk-hint" aria-hidden="true"><i class="ph ph-arrows-left-right"></i>Tap to compare</span>
+        </button>
+        <div class="dk-foot"><span>Patient 2</span><span class="dk-done"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Completed</span></div>
+        <button type="button" class="dk-pick" data-sc-pick aria-label="Show patient 2: Fixed bridge and crowns"></button>
+      </article>
+      <article class="dk-card" data-sc-slide data-title="Extractions and removable denture"
+               data-before-text="Severe generalized dental breakdown with extensive caries, multiple missing and non-restorable teeth, and significant loss of function and esthetics."
+               data-after-text="The hopeless teeth were extracted, the mouth was cleaned and prepared, and a removable denture was fabricated to replace the missing teeth and restore the patient&#x27;s smile, chewing ability, and overall function."
+               aria-roledescription="slide" aria-label="Patient 3 of 5">
+        <button type="button" class="dk-photo" data-sc-flip aria-label="Patient 3: show after treatment">
+          <img class="dk-img dk-img-before" src="assets/img/case-3-before.jpg" width="1200" height="900" alt="Patient 3 before treatment" draggable="false">
+          <img class="dk-img dk-img-after" src="assets/img/case-3-after.jpg" width="1200" height="900" alt="Patient 3 after treatment" draggable="false" loading="lazy">
+          <span class="dk-edge" aria-hidden="true"></span>
+          <span class="dk-pill" data-sc-pill>Before</span>
+          <span class="dk-hint" aria-hidden="true"><i class="ph ph-arrows-left-right"></i>Tap to compare</span>
+        </button>
+        <div class="dk-foot"><span>Patient 3</span><span class="dk-done"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Completed</span></div>
+        <button type="button" class="dk-pick" data-sc-pick aria-label="Show patient 3: Extractions and removable denture"></button>
+      </article>
+      <article class="dk-card" data-sc-slide data-title="Upper back teeth replaced"
+               data-before-text="Pt had been missing her upper molars for years."
+               data-after-text="Her missing upper molars were replaced, giving her back teeth again and restoring her ability to chew."
+               aria-roledescription="slide" aria-label="Patient 4 of 5">
+        <button type="button" class="dk-photo" data-sc-flip aria-label="Patient 4: show after treatment">
+          <img class="dk-img dk-img-before" src="assets/img/case-4-before.jpg" width="1200" height="900" alt="Patient 4 before treatment" draggable="false">
+          <img class="dk-img dk-img-after" src="assets/img/case-4-after.jpg" width="1200" height="900" alt="Patient 4 after treatment" draggable="false" loading="lazy">
+          <span class="dk-edge" aria-hidden="true"></span>
+          <span class="dk-pill" data-sc-pill>Before</span>
+          <span class="dk-hint" aria-hidden="true"><i class="ph ph-arrows-left-right"></i>Tap to compare</span>
+        </button>
+        <div class="dk-foot"><span>Patient 4</span><span class="dk-done"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Completed</span></div>
+        <button type="button" class="dk-pick" data-sc-pick aria-label="Show patient 4: Upper back teeth replaced"></button>
+      </article>
+      <article class="dk-card" data-sc-slide data-title="Front bridge, teeth 7 to 10"
+               data-before-text="Pt had decay and rot on teeth 7 through 10, the four upper front teeth."
+               data-after-text="A bridge was placed from tooth 7 to tooth 10, restoring her smile and giving her another chance at life."
+               aria-roledescription="slide" aria-label="Patient 5 of 5">
+        <button type="button" class="dk-photo" data-sc-flip aria-label="Patient 5: show after treatment">
+          <img class="dk-img dk-img-before" src="assets/img/case-5-before.jpg" width="1200" height="900" alt="Patient 5 before treatment" draggable="false">
+          <img class="dk-img dk-img-after" src="assets/img/case-5-after.jpg" width="1200" height="900" alt="Patient 5 after treatment" draggable="false" loading="lazy">
+          <span class="dk-edge" aria-hidden="true"></span>
+          <span class="dk-pill" data-sc-pill>Before</span>
+          <span class="dk-hint" aria-hidden="true"><i class="ph ph-arrows-left-right"></i>Tap to compare</span>
+        </button>
+        <div class="dk-foot"><span>Patient 5</span><span class="dk-done"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Completed</span></div>
+        <button type="button" class="dk-pick" data-sc-pick aria-label="Show patient 5: Front bridge, teeth 7 to 10"></button>
+      </article>
     </div>
 
-    <div class="sc-info">
-      <div class="sc-meta">
-        <span class="sc-count" data-sc-count>Patient 1 of 5</span>
-        <div class="sc-ctrls">
-          <button type="button" class="sc-ctrl" data-sc-prev aria-label="Previous patient"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
-          <button type="button" class="sc-ctrl" data-sc-play aria-label="Pause autoplay"><i class="ph ph-pause" aria-hidden="true"></i></button>
-          <button type="button" class="sc-ctrl" data-sc-next aria-label="Next patient"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
-        </div>
-      </div>
-      <h3 class="sc-title" data-sc-title>Upper arch bridge</h3>
-      <div class="seg" data-seg data-state="0" role="group" aria-label="Compare before and after">
+    <div class="dk-info">
+      <p class="dk-kicker" data-sc-count>Patient 1 of 5</p>
+      <h3 class="dk-title" data-sc-title>Upper arch bridge</h3>
+      <div class="seg" data-seg data-state="0" role="group" aria-label="Show before or after">
         <span class="seg-thumb" aria-hidden="true"></span>
         <button type="button" aria-pressed="true" data-seg-option="0">Before</button>
         <button type="button" aria-pressed="false" data-seg-option="1">After</button>
       </div>
-      <p class="sc-desc" data-sc-desc aria-live="off">Pt suffered with severe generalized dental caries with multiple missing/fractured teeth and advanced loss of tooth structure.</p>
-      <div class="sc-thumbs">
-        <button type="button" class="sc-thumb is-active" data-sc-thumb aria-label="Show patient 1: Upper arch bridge" aria-current="true">
-          <img src="assets/img/case-1-thumb.jpg" width="240" height="180" alt="" loading="lazy" draggable="false">
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </button>
-        <button type="button" class="sc-thumb" data-sc-thumb aria-label="Show patient 2: Fixed bridge and crowns">
-          <img src="assets/img/case-2-thumb.jpg" width="240" height="180" alt="" loading="lazy" draggable="false">
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </button>
-        <button type="button" class="sc-thumb" data-sc-thumb aria-label="Show patient 3: Extractions and removable denture">
-          <img src="assets/img/case-3-thumb.jpg" width="240" height="180" alt="" loading="lazy" draggable="false">
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </button>
-        <button type="button" class="sc-thumb" data-sc-thumb aria-label="Show patient 4: Upper back teeth replaced">
-          <img src="assets/img/case-4-thumb.jpg" width="240" height="180" alt="" loading="lazy" draggable="false">
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </button>
-        <button type="button" class="sc-thumb" data-sc-thumb aria-label="Show patient 5: Front bridge, teeth 6 to 11">
-          <img src="assets/img/case-5-thumb.jpg" width="240" height="180" alt="" loading="lazy" draggable="false">
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </button>
+      <p class="dk-desc" data-sc-desc aria-live="off"></p>
+      <div class="dk-ctrls">
+        <button type="button" class="dk-arrow" data-sc-prev aria-label="Previous patient"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
+        <div class="dk-dots" role="group" aria-label="Choose a patient">
+        <button type="button" class="dk-dot" data-sc-dot aria-label="Show patient 1"><i></i></button>
+        <button type="button" class="dk-dot" data-sc-dot aria-label="Show patient 2"><i></i></button>
+        <button type="button" class="dk-dot" data-sc-dot aria-label="Show patient 3"><i></i></button>
+        <button type="button" class="dk-dot" data-sc-dot aria-label="Show patient 4"><i></i></button>
+        <button type="button" class="dk-dot" data-sc-dot aria-label="Show patient 5"><i></i></button>
+        </div>
+        <button type="button" class="dk-arrow" data-sc-next aria-label="Next patient"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
+        <button type="button" class="dk-arrow" data-sc-play aria-label="Pause autoplay"><i class="ph ph-pause" aria-hidden="true"></i></button>
       </div>
     </div>
   </div>
@@ -260,8 +257,8 @@
     <div class="glass progress-empty reveal">
       <span class="icon-tile"><i class="ph ph-check-circle" aria-hidden="true"></i></span>
       <div>
-        <h3>No one is in treatment right now</h3>
-        <p>All five patients so far have finished their care. The next case begins as soon as it is funded.</p>
+        <h3>Now working on smiles 6 to 10</h3>
+        <p>Smiles 1 to 5 are complete. Each of the next five cases begins as soon as it is funded.</p>
       </div>
       <a href="#give" class="btn btn-accent">Fund the next smile</a>
     </div>
@@ -276,10 +273,10 @@
   <div class="glass raised-panel reveal">
     <p class="eyebrow">All time</p>
     <h2>Total Raised</h2>
-    <span class="raised-num" data-raised="1950">$0</span>
+    <span class="raised-num" data-raised="1950" data-completed="5">$0</span>
 
     <!-- One segment per $500 smile. Filled when funded, the last one fills as gifts come in. -->
-    <p class="milestone-block" data-milestone-block>Smiles 1 to 5</p>
+    <p class="milestone-block" data-milestone-block>Smiles 6 to 10</p>
     <ol class="milestones" data-milestones aria-label="Smiles funded so far"></ol>
 
     <p class="raised-sub" data-raised-sub>Every <strong>$500</strong> funds one patient's full smile.</p>
@@ -293,54 +290,52 @@
   <div class="section-head reveal">
     <h2>Sponsor a Smile</h2>
     <p class="section-sub">
-      Slide the amount and watch a patient's smile come back, one tooth at a time.
-      $50 restores a tooth. $500 restores a whole smile.
+      Choose a gift and watch the meter fill. $50 restores a tooth.
+      $500 completes a patient's smile.
     </p>
   </div>
 
-  <!-- Teeth are drawn by js/main.js. Amount and teeth stay in sync both ways: tap a tooth or move the amount. -->
-  <div class="fill reveal" data-fill>
-    <div class="fill-stage" data-fill-stage>
-      <svg class="sb-arch" viewBox="0 0 600 250" role="group" aria-label="Upper smile of ten teeth. Tap a tooth to restore it." data-fill-svg></svg>
-      <span class="fill-full" aria-hidden="true"><i class="ph-fill ph-sparkle"></i>Full smile</span>
-      <div class="fill-meter">
-        <div class="fill-pips" aria-hidden="true" data-fill-pips><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <p class="fill-count"><strong data-fill-count>0</strong> of 10 teeth restored</p>
+  <div class="glass gv reveal" data-give>
+    <div class="gv-summary">
+      <p class="gv-label">Your gift</p>
+      <div class="gv-amount">
+        <span class="gv-cur" aria-hidden="true">$</span>
+        <output class="gv-num" data-give-amount aria-label="Gift amount in dollars">0</output>
+        <span class="gv-per" data-give-per>one time</span>
+      </div>
+      <div class="gv-cells" data-give-cells aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i style="--k:6"></i><i style="--k:7"></i><i style="--k:8"></i><i style="--k:9"></i></div>
+      <div class="gv-meta"><strong data-give-count>0 of 10 teeth</strong><span>$500 completes a smile</span></div>
+      <p class="gv-impact" data-give-impact aria-live="polite"></p>
+      <div class="gv-proof">
+        <div class="gv-faces" aria-hidden="true"><img src="assets/img/case-1-thumb.jpg" width="72" height="72" alt="" loading="lazy" draggable="false"><img src="assets/img/case-2-thumb.jpg" width="72" height="72" alt="" loading="lazy" draggable="false"><img src="assets/img/case-3-thumb.jpg" width="72" height="72" alt="" loading="lazy" draggable="false"><img src="assets/img/case-4-thumb.jpg" width="72" height="72" alt="" loading="lazy" draggable="false"><img src="assets/img/case-5-thumb.jpg" width="72" height="72" alt="" loading="lazy" draggable="false"></div>
+        <p><strong>5 patients restored</strong> so far. Yours could be next.</p>
       </div>
     </div>
 
-    <div class="fill-panel">
-      <div class="fill-amount">
-        <span class="fill-cur" aria-hidden="true">$</span>
-        <output class="fill-num" data-fill-amount aria-live="off" aria-label="Gift amount in dollars">150</output>
-        <span class="fill-per" data-fill-per>one time</span>
+    <div class="gv-form">
+      <div role="group" aria-labelledby="gvAmt">
+        <p class="gv-legend" id="gvAmt">Choose an amount</p>
+        <div class="gv-tiers">
+          <button type="button" class="gv-tier" data-amt="50" aria-pressed="false"><b>$50</b><small>1 tooth</small></button>
+          <button type="button" class="gv-tier" data-amt="100" aria-pressed="false"><b>$100</b><small>2 teeth</small></button>
+          <button type="button" class="gv-tier" data-amt="250" aria-pressed="false"><b>$250</b><small>5 teeth</small></button>
+          <button type="button" class="gv-tier" data-amt="500" aria-pressed="false"><b>$500</b><small>Full smile</small></button>
+        </div>
       </div>
-
-      <input type="range" class="fill-slider" min="0" max="500" step="50" value="150" data-fill-slider aria-label="Gift amount in dollars">
-
-      <div class="fill-chips" role="group" aria-label="Choose an amount">
-        <button type="button" class="gchip" data-amt="50"><span>$50</span><small>1 tooth</small></button>
-        <button type="button" class="gchip" data-amt="100"><span>$100</span><small>2 teeth</small></button>
-        <button type="button" class="gchip" data-amt="150"><span>$150</span><small>3 teeth</small></button>
-        <button type="button" class="gchip" data-amt="250"><span>$250</span><small>5 teeth</small></button>
-        <button type="button" class="gchip" data-amt="500"><span>$500</span><small>full smile</small></button>
-        <button type="button" class="gchip" data-amt="other" aria-expanded="false"><span>Other</span><small>any amount</small></button>
-      </div>
-      <label class="fill-other" data-fill-other hidden>
-        <span>Your amount</span>
-        <span class="fill-other-field"><b aria-hidden="true">$</b><input type="number" inputmode="numeric" min="5" max="100000" step="1" placeholder="75" data-fill-other-input></span>
+      <label class="gv-field">
+        <span class="gv-legend">Or enter an amount</span>
+        <span class="gv-custom"><b aria-hidden="true">$</b><input type="number" inputmode="numeric" min="5" max="100000" step="1" placeholder="Other amount" data-give-custom></span>
       </label>
-
-      <div class="seg" data-seg data-state="0" role="group" aria-label="How often">
-        <span class="seg-thumb" aria-hidden="true"></span>
-        <button type="button" aria-pressed="true" data-seg-option="0">One time</button>
-        <button type="button" aria-pressed="false" data-seg-option="1">Monthly</button>
+      <div class="gv-freq">
+        <p class="gv-legend">Frequency</p>
+        <div class="seg" data-seg data-state="0" role="group" aria-label="How often">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" aria-pressed="true" data-seg-option="0">One time</button>
+          <button type="button" aria-pressed="false" data-seg-option="1">Monthly</button>
+        </div>
       </div>
-
-      <p class="fill-impact" data-fill-impact aria-live="polite"></p>
-
-      <button type="button" class="btn btn-lg btn-block fill-cta" data-fill-give>Give $150</button>
-      <p class="fill-note">Every contribution goes directly to a patient's reconstruction.</p>
+      <button type="button" class="btn btn-accent btn-lg btn-block gv-cta" data-give-cta disabled>Choose an amount</button>
+      <p class="gv-note">Every contribution goes directly to a patient's reconstruction.</p>
     </div>
   </div>
 </section>
@@ -520,6 +515,6 @@
 <!-- ===================== TOAST (donate/buy placeholder feedback) ===================== -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/main.js?v=2026-11-01a"></script>
+<script src="js/main.js?v=2026-11-02a"></script>
 </body>
 </html>
