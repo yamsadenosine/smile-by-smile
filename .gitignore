@@ -1,2 +1,8 @@
 .DS_Store
 **/.DS_Store
+
+# design tooling + product notes: local only, never served on smilebysmile.co
+.impeccable/
+.playwright-mcp/
+PRODUCT.md
+DESIGN.md

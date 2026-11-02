@@ -176,31 +176,245 @@ function initTwoStateToggle(root, { stage, faces, onChange }) {
   options.forEach((opt, i) => opt.addEventListener('click', () => set(i)));
 }
 
-/* Before / After cards: the clinical caption swaps with a quick blur crossfade. */
-document.querySelectorAll('[data-ba]').forEach((card) => {
-  const stage = card.querySelector('[data-ba-stage]');
-  const desc = card.querySelector('[data-ba-desc]');
-  const faces = [card.querySelector('[data-ba-before]'), card.querySelector('[data-ba-after]')];
-  const patient = stage.getAttribute('aria-label').split(':')[0];
+/* =========================================================
+   Transformations showcase. It plays by itself (before, a
+   light wipe to after, then the next patient), and the person
+   always wins: hover, focus, swipe, tap, arrows or a thumbnail
+   take over, and autoplay returns after a few quiet seconds.
+   There's a pause button, and reduced-motion users get no
+   autoplay at all.
+   ========================================================= */
+(function initShowcase() {
+  const root = document.querySelector('[data-showcase]');
+  if (!root) return;
+  const q = (sel) => root.querySelector(sel);
+  const viewport = q('[data-sc-viewport]');
+  const track = q('[data-sc-track]');
+  const slides = Array.from(root.querySelectorAll('[data-sc-slide]'));
+  const thumbs = Array.from(root.querySelectorAll('[data-sc-thumb]'));
+  const bars = thumbs.map((t) => t.querySelector('.sc-bar i'));
+  const stateEl = q('[data-sc-state]');
+  const countEl = q('[data-sc-count]');
+  const titleEl = q('[data-sc-title]');
+  const descEl = q('[data-sc-desc]');
+  const seg = q('[data-seg]');
+  const segOpts = Array.from(seg.querySelectorAll('[data-seg-option]'));
+  const playBtn = q('[data-sc-play]');
+  const N = slides.length;
 
-  initTwoStateToggle(card, {
-    stage,
-    faces,
-    onChange(state) {
-      card.classList.add('has-interacted');
-      stage.setAttribute('aria-label', `${patient}: show ${state ? 'before' : 'after'} treatment`);
-      if (!desc) return;
-      const nextText = state ? desc.dataset.afterText : desc.dataset.beforeText;
-      if (reduceMotion()) { desc.textContent = nextText; return; }
-      desc.classList.add('is-swapping');
-      clearTimeout(desc._t);
-      desc._t = setTimeout(() => {
-        desc.textContent = nextText;
-        desc.classList.remove('is-swapping');
-      }, 160);
+  // Reading time: each phase stays up long enough to read its sentence.
+  const phaseMs = (text) => Math.min(9000, Math.max(4200, 2200 + text.trim().split(/\s+/).length * 180));
+  const cases = slides.map((s) => ({
+    title: s.dataset.title,
+    before: s.dataset.beforeText,
+    after: s.dataset.afterText,
+    dBefore: phaseMs(s.dataset.beforeText),
+    dAfter: phaseMs(s.dataset.afterText),
+  }));
+
+  let index = 0, isAfter = false, elapsed = 0, last = 0, raf = 0;
+  let userPaused = reduceMotion();
+  let inView = false, tabVisible = !document.hidden, hover = false, focus = false, dragging = false, holdUntil = 0;
+  let suppressClick = false, edgeT = 0;
+  const lastP = [];
+
+  const running = () => inView && tabVisible && !userPaused;
+  const held = (now) => hover || focus || dragging || now < holdUntil;
+
+  /* ---------- clock ---------- */
+  function schedule() {
+    if (raf || !running()) return;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
+  }
+  function frame(now) {
+    raf = 0;
+    if (!running()) return;
+    const dt = Math.min(120, now - last);
+    last = now;
+    if (!held(now)) {
+      elapsed += dt;
+      const len = isAfter ? cases[index].dAfter : cases[index].dBefore;
+      if (elapsed >= len) { if (!isAfter) setAfter(true); else goTo(index + 1); }
     }
+    paintProgress();
+    raf = requestAnimationFrame(frame);
+  }
+  function paintProgress() {
+    const c = cases[index];
+    const total = c.dBefore + c.dAfter;
+    bars.forEach((bar, i) => {
+      const p = i < index ? 1 : i > index ? 0 : ((isAfter ? c.dBefore : 0) + elapsed) / total;
+      const v = Math.round(p * 500) / 500;
+      if (lastP[i] !== v) { lastP[i] = v; bar.style.setProperty('--p', v); }
+    });
+  }
+  function engage() {
+    holdUntil = performance.now() + 9000;
+    root.classList.add('has-interacted');
+    updatePlay();
+  }
+
+  /* ---------- state ---------- */
+  function setDesc(text) {
+    if (descEl.textContent === text) return;
+    if (reduceMotion()) { descEl.textContent = text; return; }
+    descEl.classList.add('is-swapping');
+    clearTimeout(descEl._t);
+    descEl._t = setTimeout(() => { descEl.textContent = text; descEl.classList.remove('is-swapping'); }, 170);
+  }
+  function updatePlay() {
+    playBtn.querySelector('i').className = userPaused ? 'ph ph-play' : 'ph ph-pause';
+    playBtn.setAttribute('aria-label', userPaused ? 'Play autoplay' : 'Pause autoplay');
+    // Screen readers shouldn't be narrated at while it plays on its own.
+    descEl.setAttribute('aria-live', userPaused || root.classList.contains('has-interacted') ? 'polite' : 'off');
+  }
+  function render() {
+    const c = cases[index];
+    countEl.textContent = `Patient ${index + 1} of ${N}`;
+    titleEl.textContent = c.title;
+    setDesc(isAfter ? c.after : c.before);
+    stateEl.textContent = isAfter ? 'After' : 'Before';
+    stateEl.classList.toggle('is-after', isAfter);
+    seg.dataset.state = isAfter ? '1' : '0';
+    segOpts.forEach((o, i) => o.setAttribute('aria-pressed', String((i === 1) === isAfter)));
+    thumbs.forEach((t, i) => {
+      t.classList.toggle('is-active', i === index);
+      if (i === index) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current');
+    });
+    slides.forEach((s, i) => {
+      s.inert = i !== index;
+      s.setAttribute('aria-hidden', String(i !== index));
+      s.querySelector('[data-sc-flip]').setAttribute('aria-label',
+        `Patient ${i + 1}: show ${i === index && isAfter ? 'before' : 'after'} treatment`);
+    });
+    paintProgress();
+  }
+  function flashEdge() {
+    if (reduceMotion()) return;
+    viewport.setAttribute('data-wiping', '');
+    clearTimeout(edgeT);
+    edgeT = setTimeout(() => viewport.removeAttribute('data-wiping'), 900);
+  }
+  function setAfter(v, { manual = false } = {}) {
+    if (isAfter === v) return;
+    isAfter = v;
+    elapsed = 0;
+    if (manual) engage();
+    slides[index].classList.toggle('is-after', v);
+    flashEdge();
+    render();
+  }
+  function setTrack() { track.style.transform = `translate3d(${-index * 100}%, 0, 0)`; }
+  function prefetch(i) {
+    slides[(i + N) % N].querySelectorAll('img[loading="lazy"]').forEach((im) => { im.loading = 'eager'; });
+  }
+  function goTo(next, { manual = false } = {}) {
+    const wrapped = next < 0 || next >= N;
+    next = (next + N) % N;
+    if (next === index && !wrapped) return;
+    const leaving = slides[index];
+    index = next;
+    isAfter = false;
+    elapsed = 0;
+    if (manual) engage();
+    // let the old slide finish sliding away before it wipes back to "before"
+    setTimeout(() => { if (slides[index] !== leaving) leaving.classList.remove('is-after'); }, 780);
+    slides[index].classList.remove('is-after');
+    if (wrapped && !reduceMotion()) {
+      // looping 5 -> 1 would rewind through every slide; fade across instead
+      viewport.classList.add('is-wrapping');
+      setTimeout(() => {
+        track.style.transition = 'none';
+        setTrack();
+        void track.offsetWidth;
+        track.style.transition = '';
+        viewport.classList.remove('is-wrapping');
+      }, 230);
+    } else {
+      setTrack();
+    }
+    prefetch(index);
+    prefetch(index + 1);
+    render();
+  }
+
+  /* ---------- controls ---------- */
+  q('[data-sc-prev]').addEventListener('click', () => goTo(index - 1, { manual: true }));
+  q('[data-sc-next]').addEventListener('click', () => goTo(index + 1, { manual: true }));
+  playBtn.addEventListener('click', () => {
+    userPaused = !userPaused;
+    if (!userPaused) holdUntil = 0;
+    updatePlay();
+    schedule();
   });
-});
+  thumbs.forEach((t, i) => t.addEventListener('click', () => goTo(i, { manual: true })));
+  segOpts.forEach((o, i) => o.addEventListener('click', () => setAfter(i === 1, { manual: true })));
+  slides.forEach((s) => s.querySelector('[data-sc-flip]').addEventListener('click', () => {
+    if (suppressClick) return;
+    setAfter(!isAfter, { manual: true });
+  }));
+  viewport.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1, { manual: true }); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1, { manual: true }); }
+  });
+
+  /* ---------- swipe / drag ---------- */
+  let drag = null;
+  viewport.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, t: performance.now(), locked: false };
+  });
+  viewport.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.locked) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } // a vertical swipe is the page scrolling
+      drag.locked = true;
+      viewport.setPointerCapture(e.pointerId);
+      viewport.classList.add('is-dragging');
+      dragging = true;
+      engage();
+    }
+    drag.dx = dx;
+    track.style.transform = `translate3d(calc(${-index * 100}% + ${dx}px), 0, 0)`;
+  });
+  function endDrag(e, cancelled) {
+    if (!drag || (e && e.pointerId !== drag.id)) return;
+    const d = drag;
+    drag = null;
+    if (!d.locked) return; // a tap: the click handler flips the photo
+    viewport.classList.remove('is-dragging');
+    dragging = false;
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 60);
+    const speed = d.dx / Math.max(1, performance.now() - d.t);
+    if (!cancelled && (Math.abs(d.dx) > viewport.clientWidth * 0.18 || Math.abs(speed) > 0.5)) {
+      goTo(index + (d.dx < 0 ? 1 : -1), { manual: true });
+    } else {
+      setTrack();
+    }
+  }
+  viewport.addEventListener('pointerup', (e) => endDrag(e, false));
+  viewport.addEventListener('pointercancel', (e) => endDrag(e, true));
+  viewport.addEventListener('click', (e) => { if (suppressClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+  /* ---------- when to play ---------- */
+  root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hover = true; });
+  root.addEventListener('pointerleave', () => { hover = false; });
+  root.addEventListener('focusin', (e) => { if (e.target.matches(':focus-visible')) focus = true; });
+  root.addEventListener('focusout', () => { focus = false; });
+  document.addEventListener('visibilitychange', () => { tabVisible = !document.hidden; schedule(); });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; if (inView) schedule(); }, { threshold: 0.3 }).observe(root);
+  } else { inView = true; schedule(); }
+
+  render();
+  updatePlay();
+  prefetch(0);
+  prefetch(1);
+})();
 
 /* Crewneck: tap the photo or use Front/Back. */
 document.querySelectorAll('[data-shop-product]').forEach((card) => {
@@ -278,18 +492,20 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
 })();
 
 /* =========================================================
-   Smile builder: an upper smile of ten decayed teeth.
-   Tap a tooth and a healthy one grows out of the gum
-   ($50 each, $500 for a full smile).
+   Sponsor a smile: an upper smile of ten decayed teeth that
+   heal as the gift grows ($50 a tooth, $500 a full smile).
+   The amount drives the teeth and the teeth drive the amount:
+   slide, pick a chip, or tap a tooth. On first view it plays a
+   short demo by itself, and stops the instant someone touches it.
    Drawing notes: teeth use frontal-view proportions (visible
    widths shrink toward the back of the arch), the gum is drawn
    OVER the teeth so restored teeth can emerge from under it.
    ========================================================= */
-(function initSmileBuilder() {
-  const root = document.querySelector('[data-smile-builder]');
+(function initFill() {
+  const root = document.querySelector('[data-fill]');
   if (!root) return;
-  const svg = root.querySelector('[data-sb-svg]');
-  const popEl = root.querySelector('[data-sb-pop]');
+  const svg = root.querySelector('[data-fill-svg]');
+  const stage = root.querySelector('[data-fill-stage]');
   const NS = 'http://www.w3.org/2000/svg';
   const COST = 50;
   const CX = 300;
@@ -386,6 +602,7 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
   radial('sbStain', [['0', '#4A3216', 0.75], ['1', '#4A3216', 0]]);
   radial('sbCaries', [['0', '#0B0703'], ['0.6', '#22160A'], ['1', '#4A3418', 0]]);
   linear('sbGum', [['0', '#9E3F52'], ['0.55', '#C9616F'], ['0.85', '#DE8590'], ['1', '#E99AA2']]);
+  linear('sbSheen', [['0', '#FFFFFF', 0], ['0.5', '#FFFFFF', 0.85], ['1', '#FFFFFF', 0]], true);
 
   const fxBack = el('g', { class: 'sb-fx' }, svg);
   const teethLayer = el('g', {}, svg);
@@ -465,12 +682,14 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     el('ellipse', { cx: f(w * 0.1 * m), cy: f(h * 0.45), rx: f(w * 0.13), ry: f(h * 0.3), fill: 'url(#sbGloss)' }, hInner);
     el('ellipse', { cx: f(-w * 0.2 * m), cy: f(h * 0.5), rx: f(w * 0.05), ry: f(h * 0.22), fill: 'url(#sbGloss)', opacity: 0.5 }, hInner);
     if (dim) el('rect', { x: f(-w), y: 0, width: f(w * 2), height: f(h * 1.2), fill: '#0A0C10', opacity: dim }, hInner);
+    // a pass of light across the new enamel (animated on restore)
+    const sheen = el('rect', { x: f(-w * 1.1), y: f(-h * 0.1), width: f(w * 0.55), height: f(h * 1.3), fill: 'url(#sbSheen)', opacity: 0 }, hInner);
     el('path', { d: outline, fill: 'none', stroke: 'rgba(70,52,30,0.32)', 'stroke-width': 1 }, grow);
 
     el('rect', { class: 't-hit', x: f(-w / 2), y: 0, width: f(w), height: f(h) }, body);
     el('path', { class: 't-focus', d: outline }, body);
 
-    const tooth = { ...t, g, damaged, grow, jag, restored: false };
+    const tooth = { ...t, g, damaged, grow, jag, sheen, restored: false };
     g.addEventListener('click', () => toggle(tooth));
     g.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(tooth); }
@@ -525,39 +744,18 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     svg.setAttribute('viewBox', `${f(bb.x - 10)} ${f(bb.y - 4)} ${f(bb.width + 20)} ${f(bb.height + 26)}`);
   } catch (_) { svg.setAttribute('viewBox', '120 0 360 190'); }
 
-  /* ---------- comic effects ---------- */
-  function starburst(t) {
-    const c = toWorld(t, 0, t.h * 0.62);
-    const spikes = 12;
-    const r1 = t.w * 0.62, r2 = t.w * 1.02;
-    const pts = Array.from({ length: spikes * 2 }, (_, k) => {
-      const a = (k / (spikes * 2)) * Math.PI * 2;
-      const r = k % 2 ? r1 : r2;
-      return `${f(c.x + Math.cos(a) * r)},${f(c.y + Math.sin(a) * r)}`;
-    }).join(' ');
-    const burst = el('polygon', { class: 'sb-burst', points: pts }, fxBack);
-    burst.animate([
-      { opacity: 0, transform: 'scale(0.3) rotate(-8deg)' },
-      { opacity: 1, transform: 'scale(1.08) rotate(4deg)', offset: 0.35 },
-      { opacity: 0, transform: 'scale(1.22) rotate(10deg)' },
-    ], { duration: 620, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }).onfinish = () => burst.remove();
-
-    const lines = el('g', {}, fxFront);
-    for (let k = 0; k < 8; k++) {
-      const a = (k / 8) * Math.PI * 2 + 0.2;
-      const r = t.w * 0.75;
-      const line = el('line', {
-        class: 'sb-action',
-        x1: f(c.x + Math.cos(a) * r), y1: f(c.y + Math.sin(a) * r),
-        x2: f(c.x + Math.cos(a) * (r + 9)), y2: f(c.y + Math.sin(a) * (r + 9)),
-      }, lines);
-      line.animate([
-        { opacity: 0, transform: 'translate(0, 0)' },
-        { opacity: 1, offset: 0.3 },
-        { opacity: 0, transform: `translate(${f(Math.cos(a) * 10)}px, ${f(Math.sin(a) * 10)}px)` },
-      ], { duration: 460, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
-    }
-    setTimeout(() => lines.remove(), 500);
+  /* ---------- effects ---------- */
+  // A soft four-point glint on the tooth's shoulder as it comes in.
+  function glint(t) {
+    const c = toWorld(t, t.w * 0.2 * t.m, t.h * 0.22);
+    const s = Math.max(8, t.w * 0.3), k = s * 0.14;
+    const d = `M ${f(c.x)} ${f(c.y - s)} Q ${f(c.x + k)} ${f(c.y - k)} ${f(c.x + s)} ${f(c.y)} Q ${f(c.x + k)} ${f(c.y + k)} ${f(c.x)} ${f(c.y + s)} Q ${f(c.x - k)} ${f(c.y + k)} ${f(c.x - s)} ${f(c.y)} Q ${f(c.x - k)} ${f(c.y - k)} ${f(c.x)} ${f(c.y - s)} Z`;
+    const star = el('path', { class: 'sb-glint', d }, fxFront);
+    star.animate([
+      { opacity: 0, transform: 'scale(0.2) rotate(-30deg)' },
+      { opacity: 1, transform: 'scale(1) rotate(0deg)', offset: 0.4 },
+      { opacity: 0, transform: 'scale(0.6) rotate(25deg)' },
+    ], { duration: 760, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }).onfinish = () => star.remove();
   }
 
   function crumble(t) {
@@ -587,7 +785,7 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     tooth.g.setAttribute('aria-label', `${tooth.name}, restored. Tap to undo.`);
     if (reduce()) { tooth.g.classList.add('is-restored'); return; }
 
-    // 1. the old tooth shudders, 2. crumbles away, 3. a new one pops out of the gum, 4. comic burst
+    // 1. the old tooth shudders, 2. crumbles away, 3. a new one grows out of the gum, 4. light sweeps across it
     tooth.damaged.animate([
       { transform: 'translateX(0)' }, { transform: 'translateX(-1.6px)' }, { transform: 'translateX(1.6px)' },
       { transform: 'translateX(-1px)' }, { transform: 'translateX(0)' },
@@ -602,7 +800,12 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
         { transform: 'translateY(-2%) scale(0.98, 1.04)', offset: 0.78 },
         { transform: 'translateY(0) scale(1, 1)' },
       ], { duration: 560, easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)', fill: 'backwards' });
-      setTimeout(() => tooth.restored && starburst(tooth), 300);
+      tooth.sheen.animate([
+        { opacity: 0, transform: 'translateX(0) skewX(-18deg)' },
+        { opacity: 0.9, offset: 0.3 },
+        { opacity: 0, transform: `translateX(${f(tooth.w * 2.7)}px) skewX(-18deg)` },
+      ], { duration: 820, delay: 220, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
+      setTimeout(() => tooth.restored && glint(tooth), 320);
     }, 140);
   }
 
@@ -618,84 +821,173 @@ document.querySelectorAll('[data-shop-product]').forEach((card) => {
     };
   }
 
-  /* ---------- readout ---------- */
-  const countEl = root.querySelector('[data-sb-count]');
-  const amountEl = root.querySelector('[data-sb-amount]');
-  const messageEl = root.querySelector('[data-sb-message]');
-  const donateBtn = root.querySelector('[data-sb-donate]');
-
-  function bump(node) {
-    if (reduce()) return;
-    node.parentElement.animate(
-      [{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
-      { duration: 260, easing: EASE_OUT }
-    );
-  }
-
-  let wasFull = false;
-  function update() {
-    const count = teeth.filter(t => t.restored).length;
-    const amount = count * COST;
-    countEl.textContent = count;
-    amountEl.textContent = amount.toLocaleString('en-US');
-    bump(countEl); bump(amountEl);
-    donateBtn.disabled = count === 0;
-    donateBtn.textContent = count === 0 ? 'Pick Teeth to Restore' : `Donate $${amount.toLocaleString('en-US')}`;
-    if (count === 0) {
-      messageEl.innerHTML = 'Each tooth costs about <strong>$50</strong> to restore. Ten teeth make a full smile.';
-    } else if (count < teeth.length) {
-      const left = teeth.length - count;
-      messageEl.innerHTML = `You're restoring <strong>${count}</strong> ${count === 1 ? 'tooth' : 'teeth'} for one patient. ${left} more for a full smile.`;
-    } else {
-      messageEl.innerHTML = '<strong>Full smile restored.</strong> $500 funds one patient\'s complete reconstruction.';
-    }
-    const full = count === teeth.length;
-    if (full && !wasFull && popEl) {
-      setTimeout(() => popEl.classList.add('is-on'), reduce() ? 0 : 520);
-    } else if (!full && popEl) {
-      popEl.classList.remove('is-on');
-    }
-    wasFull = full;
-  }
-
-  function toggle(tooth) {
-    root.classList.add('has-interacted');
-    tooth.restored ? undo(tooth) : restore(tooth);
-    update();
-  }
+  /* ---------- the gift ---------- */
+  const $ = (sel) => root.querySelector(sel);
+  const amountEl = $('[data-fill-amount]');
+  const perEl = $('[data-fill-per]');
+  const sliderEl = $('[data-fill-slider]');
+  const chips = Array.from(root.querySelectorAll('[data-amt]'));
+  const otherWrap = $('[data-fill-other]');
+  const otherInput = $('[data-fill-other-input]');
+  const impactEl = $('[data-fill-impact]');
+  const ctaEl = $('[data-fill-give]');
+  const countEl = $('[data-fill-count]');
+  const pips = Array.from(root.querySelectorAll('[data-fill-pips] i'));
+  const SMILE = COST * teeth.length; // $500
 
   // Center teeth first, rippling outward.
-  const centerOut = [...teeth].sort((a, b) => Math.abs(a.i - 4.5) - Math.abs(b.i - 4.5));
-  root.querySelector('[data-sb-all]').addEventListener('click', () => {
-    root.classList.add('has-interacted');
-    centerOut.filter(t => !t.restored && !t.queued).forEach((t, k) => {
-      if (reduce()) { restore(t); return; }
-      t.queued = setTimeout(() => { t.queued = 0; restore(t); update(); }, k * 90);
-    });
-    update();
-  });
-  root.querySelector('[data-sb-reset]').addEventListener('click', () => {
-    teeth.forEach(t => {
-      if (t.queued) { clearTimeout(t.queued); t.queued = 0; }
-      if (t.restored) undo(t);
-    });
-    update();
-  });
-  donateBtn.addEventListener('click', () => {
-    const amount = teeth.filter(t => t.restored).length * COST;
-    if (amount) handleDonate('One-Time', amount);
-  });
+  const order = [...teeth].sort((a, b) => Math.abs(a.i - 4.5) - Math.abs(b.i - 4.5));
+  const money = (v) => '$' + Math.round(v).toLocaleString('en-US');
+  const teethFor = (v) => Math.min(teeth.length, Math.floor(v / COST));
 
-  update();
+  let amount = 0, monthly = false, otherOpen = false, shown = 0, tweenRaf = 0;
+  const demo = { timer: 0, step: 0, on: false };
+
+  // Move the visible number toward the new amount instead of snapping.
+  function showNumber(to) {
+    cancelAnimationFrame(tweenRaf);
+    if (reduce() || Math.abs(to - shown) < 2) { shown = to; amountEl.textContent = Math.round(to).toLocaleString('en-US'); return; }
+    const from = shown, start = performance.now(), len = 420;
+    (function tick(now) {
+      const t = Math.min(1, (now - start) / len);
+      shown = from + (to - from) * easeOutCubic(t);
+      amountEl.textContent = Math.round(shown).toLocaleString('en-US');
+      if (t < 1) tweenRaf = requestAnimationFrame(tick);
+    })(start);
+  }
+
+  function impactText(n) {
+    if (amount <= 0) return `Pick an amount to start restoring teeth. <strong>${money(COST)}</strong> restores one.`;
+    if (monthly) {
+      const months = SMILE / amount;
+      const cadence = months <= 1.05 ? 'a full smile every month' : `about one full smile every ${Math.round(months)} months`;
+      return `<strong>${money(amount)} a month</strong> is ${money(amount * 12)} a year: ${cadence}.`;
+    }
+    if (amount < COST) return `<strong>${money(amount)}</strong> goes toward the next tooth. ${money(COST)} restores one.`;
+    if (amount >= SMILE) {
+      const smiles = Math.floor(amount / SMILE), rest = amount - smiles * SMILE;
+      if (!rest) return `<strong>${money(amount)}</strong> gives ${smiles === 1 ? 'one patient a complete smile' : `${smiles} patients complete smiles`}.`;
+      return `<strong>${money(amount)}</strong> funds ${smiles === 1 ? 'a complete smile' : `${smiles} complete smiles`}, plus ${money(rest)} toward the next patient.`;
+    }
+    return `<strong>${money(amount)}</strong> restores ${n} ${n === 1 ? 'tooth' : 'teeth'}. ${money(SMILE - amount)} more completes this patient's smile.`;
+  }
+
+  function renderPanel() {
+    const n = teethFor(amount);
+    showNumber(amount);
+    perEl.textContent = monthly ? 'per month' : 'one time';
+    const snapped = Math.min(SMILE, Math.round(amount / COST) * COST);
+    sliderEl.value = String(snapped);
+    sliderEl.style.setProperty('--p', `calc(17px + (100% - 34px) * ${snapped / SMILE})`);
+    chips.forEach((c) => {
+      const on = c.dataset.amt === 'other' ? otherOpen : (!otherOpen && Number(c.dataset.amt) === amount);
+      c.classList.toggle('is-active', on);
+      if (c.dataset.amt === 'other') c.setAttribute('aria-expanded', String(otherOpen));
+      else c.setAttribute('aria-pressed', String(on));
+    });
+    otherWrap.hidden = !otherOpen;
+    pips.forEach((p, i) => p.classList.toggle('is-on', i < n));
+    countEl.textContent = n;
+    stage.classList.toggle('is-full', n >= teeth.length);
+    stage.style.setProperty('--fill', n / teeth.length);
+    impactEl.innerHTML = impactText(n);
+    ctaEl.disabled = amount < 5;
+    ctaEl.textContent = amount < 5 ? 'Choose an amount' : `Give ${money(amount)}${monthly ? ' every month' : ''}`;
+  }
+
+  // Heal the first n teeth (center out) and break the rest back down.
+  function setCount(n, stagger) {
+    const want = new Set(order.slice(0, n));
+    let rank = 0;
+    order.forEach((t) => {
+      if (want.has(t)) {
+        if (t.restored || t.queued) return;
+        const delay = stagger && !reduce() ? rank++ * 110 : 0;
+        if (delay) t.queued = setTimeout(() => { t.queued = 0; restore(t); }, delay);
+        else restore(t);
+      } else {
+        if (t.queued) { clearTimeout(t.queued); t.queued = 0; }
+        if (t.restored) undo(t);
+      }
+    });
+  }
+
+  function setAmount(v, { stagger = true } = {}) {
+    amount = Math.max(0, Math.round(v) || 0);
+    setCount(teethFor(amount), stagger);
+    renderPanel();
+  }
+
+  function glintCta() {
+    if (reduce() || ctaEl.disabled) return;
+    ctaEl.classList.remove('is-glint');
+    void ctaEl.offsetWidth;
+    ctaEl.classList.add('is-glint');
+  }
+
+  /* ---------- tapping a tooth ---------- */
+  function toggle(tooth) {
+    stopDemo();
+    root.classList.add('has-interacted');
+    if (tooth.queued) { clearTimeout(tooth.queued); tooth.queued = 0; }
+    else if (tooth.restored) undo(tooth);
+    else restore(tooth);
+    amount = teeth.filter((t) => t.restored || t.queued).length * COST;
+    otherOpen = false;
+    renderPanel();
+  }
+
+  /* ---------- controls ---------- */
+  sliderEl.addEventListener('input', () => { otherOpen = false; setAmount(Number(sliderEl.value), { stagger: false }); });
+  sliderEl.addEventListener('change', glintCta);
+  chips.forEach((chip) => chip.addEventListener('click', () => {
+    if (chip.dataset.amt === 'other') {
+      otherOpen = !otherOpen;
+      renderPanel();
+      if (otherOpen) otherInput.focus();
+      return;
+    }
+    otherOpen = false;
+    setAmount(Number(chip.dataset.amt));
+    glintCta();
+  }));
+  otherInput.addEventListener('input', () => {
+    const v = parseInt(otherInput.value, 10);
+    amount = Number.isFinite(v) && v > 0 ? v : 0;
+    setCount(teethFor(amount), false);
+    renderPanel();
+  });
+  initTwoStateToggle(root, { faces: [], onChange(state) { monthly = state === 1; renderPanel(); glintCta(); } });
+  ctaEl.addEventListener('click', () => { if (amount >= 5) handleDonate(monthly ? 'Monthly' : 'One-Time', amount); });
+
+  /* ---------- the self-playing demo ---------- */
+  const DEMO = [100, 250, 500, 150];
+  function demoStep() {
+    if (!demo.on) return;
+    setAmount(DEMO[demo.step]);
+    demo.step += 1;
+    if (demo.step >= DEMO.length) { demo.on = false; return; } // settles on the last (a friendly default)
+    demo.timer = setTimeout(demoStep, demo.step === 3 ? 2400 : 2900);
+  }
+  function stopDemo() { demo.on = false; clearTimeout(demo.timer); }
+  root.addEventListener('pointerdown', stopDemo);
+  root.addEventListener('keydown', stopDemo);
+
+  renderPanel();
 
   onceInView(root, () => {
     root.classList.add('is-in');
     setTimeout(() => root.classList.add('is-settled'), 900);
-  }, { threshold: 0.2 });
+    if (reduce()) { setAmount(150, { stagger: false }); return; }
+    demo.on = true;
+    demo.timer = setTimeout(demoStep, 1500);
+  }, { threshold: 0.3 });
+
+  if (reduce()) setAmount(150, { stagger: false });
 })();
 
 /* =========================================================
-   Chip groups: give amounts and crewneck sizes
+   Chip groups: crewneck sizes
    ========================================================= */
 function initChipGroup(group, onSelect) {
   const chips = group.querySelectorAll('.chip');
@@ -707,10 +999,6 @@ function initChipGroup(group, onSelect) {
     });
   });
 }
-document.querySelectorAll('.give-card').forEach((card) => {
-  const donateBtn = card.querySelector('[data-donate-btn]');
-  initChipGroup(card, (chip) => { if (donateBtn) donateBtn.dataset.selectedAmount = chip.dataset.amount; });
-});
 document.querySelectorAll('[data-size-group]').forEach((group) => initChipGroup(group));
 
 /* =========================================================
@@ -773,13 +1061,6 @@ function handleBuy(product, price, size) {
   // TODO: replace with a real checkout (Stripe Payment Link, Shopify Buy Button, etc.)
   showToast(`${product} (${size}), $${price}: checkout is coming soon.`);
 }
-
-document.querySelectorAll('[data-donate-btn]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const amount = btn.dataset.selectedAmount;
-    handleDonate(btn.dataset.freq, amount && amount !== 'custom' ? amount : null);
-  });
-});
 
 document.querySelectorAll('[data-buy-btn]').forEach((btn) => {
   btn.addEventListener('click', () => {
